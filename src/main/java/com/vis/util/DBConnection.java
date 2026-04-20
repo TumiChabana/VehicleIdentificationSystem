@@ -26,6 +26,8 @@ public class DBConnection {
         try {
             if (connection == null || connection.isClosed()) {
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                connection.createStatement()
+                        .execute("SET search_path TO public");
                 System.out.println("✅ Database connected successfully.");
             }
         } catch (SQLException e) {

@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+.root-pane {
+    -fx-background-color: #0d0d1a;
+}
+
+.left-panel {
+    -fx-background-color: transparent;
+    -fx-padding: 60;
+
+}
+
+
+.red-divider {
+    /* This creates a line that fades in at the top and out at the bottom */
+    -fx-background-color: linear-gradient(
+        to bottom, transparent 0%, #e63946 20%, #e63946 80%, transparent 100%
+    );
+    /* Strict width control */
+    -fx-min-width: 3;
+    -fx-pref-width: 3;
+    -fx-max-width: 3;
+}
+
+.logo-area { -fx-padding: 0; }
+
+.logo-text {
+    -fx-font-family: "Bebas Neue", "Impact", sans-serif;
+    -fx-font-size: 54px;
+    -fx-text-fill: #e63946;
+    -fx-effect: dropshadow(gaussian, #e6394688, 28, 0.35, 0, 0);
+}
+
+.logo-sub {
+    -fx-text-fill: #8888aa;
+    -fx-font-size: 11px;
+    -fx-letter-spacing: 3px;
+}
+
+.tagline-area {
+    -fx-padding: 80 0 80 0;
+    -fx-spacing: 8;
+}
+
+.tagline-line {
+    -fx-font-family: "Bebas Neue", "Impact", sans-serif;
+    -fx-font-size: 70px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.tagline-desc {
+    -fx-text-fill: #8888aa;
+    -fx-font-size: 14px;
+    -fx-padding: 10 0 0 0;
+    -fx-wrap-text: true;
+    -fx-max-width: 400;
+}
+
+.badge-row { -fx-padding: 20 0 0 0; }
+
+.badge {
+    -fx-background-color: #ffffff11;
+    -fx-background-radius: 20;
+    -fx-border-color: #ffffff22;
+    -fx-border-radius: 20;
+    -fx-padding: 8 16 8 16;
+    -fx-text-fill: #aaaacc;
+    -fx-font-size: 11px;
+}
+
+.right-panel {
+    -fx-background-color: linear-gradient(to bottom right, #0a0a18, #080812);
+    -fx-padding: 60;
+}
+
+.form-card-stack {
+    -fx-max-width: 460;
+    -fx-min-width: 380;
+}
+
+.form-card {
+    -fx-background-color: #12122a;
+    -fx-background-radius: 24;
+    -fx-border-color: #2a2a4a;
+    -fx-border-radius: 24;
+    -fx-border-width: 1;
+    -fx-padding: 60 70 60 70;
+    -fx-max-width: 500;
+    -fx-min-width: 400;
+    -fx-effect: dropshadow(gaussian, #00000099, 40, 0.4, 0, 8);
+}
+
+.card-accent-top {
+    -fx-background-color: linear-gradient(to right, transparent, #e63946, transparent);
+    -fx-effect: dropshadow(gaussian, #e6394688, 12, 0.5, 0, 0);
+}
+
+
+.corner-tl { -fx-border-color: #e63946 transparent transparent #e63946; -fx-border-width: 2 0 0 2; -fx-background-color: transparent; }
+.corner-tr { -fx-border-color: #e63946 #e63946 transparent transparent; -fx-border-width: 2 2 0 0; -fx-background-color: transparent; }
+.corner-bl { -fx-border-color: transparent transparent #e6394688 #e6394688; -fx-border-width: 0 0 2 2; -fx-background-color: transparent; }
+.corner-br { -fx-border-color: transparent #e6394688 #e6394688 transparent; -fx-border-width: 0 2 2 0; -fx-background-color: transparent; }
+
+.form-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI Black", sans-serif;
+}
+
+.form-subtitle {
+    -fx-text-fill: #8888aa;
+    -fx-font-size: 14px;
+    -fx-padding: 6 0 0 0;
+}
+
+.field-label {
+    -fx-text-fill: #aaaacc;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 8 0;
+    -fx-letter-spacing: 2px;
+}
+
+.form-field {
+    -fx-background-color: #0f0f22;
+    -fx-background-radius: 10;
+    -fx-border-color: #2a2a4a;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-padding: 16 20 16 20;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: #555577;
+    -fx-font-size: 14px;
+    -fx-pref-width: 380;
+    -fx-max-width: Infinity;
+}
+
+.form-field:focused {
+    -fx-border-color: #e63946;
+    -fx-effect: dropshadow(gaussian, #e6394644, 12, 0.3, 0, 0);
+}
+
+.login-btn {
+    -fx-background-color: #e63946;
+    -fx-background-radius: 10;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 18 0 18 0;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, #e6394666, 20, 0.4, 0, 4);
+    -fx-max-width: Infinity;
+}
+
+.login-btn:hover {
+    -fx-background-color: #ff4d5a;
+    -fx-effect: dropshadow(gaussian, #e6394699, 28, 0.5, 0, 6);
+}
+
+.login-btn:pressed {
+    -fx-background-color: #cc2030;
+    -fx-effect: dropshadow(gaussian, #e6394644, 10, 0.2, 0, 2);
+}
+
+.error-label {
+    -fx-text-fill: #e63946;
+    -fx-font-size: 12px;
+    -fx-padding: 6 0 0 0;
+    -fx-min-height: 20;
+}
+
+.note-text {
+    -fx-text-fill: #555577;
+    -fx-font-size: 13px;
+}
+
+.note-highlight {
+    -fx-text-fill: #e63946;
+    -fx-font-size: 13px;
+}

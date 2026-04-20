@@ -18,7 +18,7 @@ public class UserDAO {
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
+            /*if (rs.next()) {
                 String hash = rs.getString("password_hash");
                 // BCrypt verifies password against stored hash
                 if (BCrypt.checkpw(password, hash)) {
@@ -28,6 +28,14 @@ public class UserDAO {
                             hash,
                             rs.getString("role")
                     );
+                }
+            } */
+
+            // Simplified for development
+            if (rs.next()) {
+                String storedPassword = rs.getString("password_hash"); // This will just be plain text now
+                if (password.equals(storedPassword)) {
+                    return new User(rs.getInt("user_id"), rs.getString("username"), storedPassword, rs.getString("role"));
                 }
             }
 
@@ -45,10 +53,12 @@ public class UserDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // Hash the password before storing — never store plain text
+            /*Hash the password before storing — never store plain text
             String hash = BCrypt.hashpw(password, BCrypt.gensalt(10));
-            ps.setString(1, username);
             ps.setString(2, hash);
+            */
+            ps.setString(1, username);
+            ps.setString(2, password);
             ps.setString(3, role);
             return ps.executeUpdate() > 0;
 

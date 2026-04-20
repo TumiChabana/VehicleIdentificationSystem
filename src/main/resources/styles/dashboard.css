@@ -1,0 +1,77 @@
+/* =============================================
+   DASHBOARD.CSS — Dashboard screen only
+   ============================================= */
+
+.root-pane {
+    -fx-background-color: #0d0d1a;
+}
+
+.top-header {
+    -fx-background-color: #12122a;
+    -fx-padding: 16 30 16 30;
+    -fx-border-color: #2a2a4a;
+    -fx-border-width: 0 0 1 0;
+}
+
+.header-logo {
+    -fx-text-fill: #e63946;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Segoe UI Black", sans-serif;
+    -fx-effect: dropshadow(gaussian, #e6394688, 16, 0.3, 0, 0);
+}
+
+.header-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.header-sub {
+    -fx-text-fill: #8888aa;
+    -fx-font-size: 12px;
+}
+
+.header-date {
+    -fx-text-fill: #555577;
+    -fx-font-size: 11px;
+}
+
+.role-badge {
+    -fx-background-color: #2d0a3a;
+    -fx-text-fill: #e63946;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 20;
+    -fx-border-color: #e63946;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.main-content {
+    -fx-background-color: #0d0d1a;
+    -fx-min-height: 800;
+}
+
+.progress-card {
+    -fx-background-color: #1a1a35;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+}
+
+.activity-item {
+    -fx-background-color: #1a1a35;
+    -fx-background-radius: 8;
+    -fx-padding: 12 16 12 16;
+}
+
+.activity-text {
+    -fx-text-fill: #aaaacc;
+    -fx-font-size: 13px;
+}
+
+.activity-time {
+    -fx-text-fill: #555577;
+    -fx-font-size: 11px;
+}

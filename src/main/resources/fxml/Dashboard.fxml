@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.vis.controller.DashboardController"
+            styleClass="root-pane"
+            stylesheets="@../styles/dashboard.css"
+           >
+
+
+    <!-- ═══════════════════════════════════════
+         TOP — Menu Bar
+    ═══════════════════════════════════════ -->
+    <top>
+        <VBox>
+            <MenuBar styleClass="menu-bar">
+                <Menu text="File">
+                    <MenuItem text="Refresh Data"
+                              onAction="#handleRefresh"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Exit"
+                              onAction="#handleExit"/>
+                </Menu>
+                <Menu text="Modules">
+                    <MenuItem text="Workshop"
+                              onAction="#openWorkshop"/>
+                    <MenuItem text="Customer"
+                              onAction="#openCustomer"/>
+                    <MenuItem text="Police"
+                              onAction="#openPolice"/>
+                    <MenuItem text="Insurance"
+                              onAction="#openInsurance"/>
+                </Menu>
+                <Menu text="Reports">
+                    <MenuItem text="Vehicle Report"/>
+                    <MenuItem text="Violation Report"/>
+                    <MenuItem text="Insurance Report"/>
+                </Menu>
+                <Menu text="Admin">
+                    <MenuItem text="Manage Users"
+                              onAction="#openAdmin"/>
+                    <MenuItem text="System Settings"/>
+                </Menu>
+                <Menu text="Help">
+                    <MenuItem text="About VIS"/>
+                    <MenuItem text="Documentation"/>
+                </Menu>
+            </MenuBar>
+
+            <!-- Top Header Bar -->
+            <HBox styleClass="top-header" alignment="CENTER_LEFT"
+                  spacing="20">
+                <Label text="VIS" styleClass="header-logo"/>
+                <VBox>
+                    <Label text="VEHICLE IDENTIFICATION SYSTEM"
+                           styleClass="header-title"/>
+                    <Label fx:id="welcomeLabel"
+                           text="Welcome, Admin"
+                           styleClass="header-sub"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <VBox alignment="CENTER_RIGHT" spacing="4">
+                    <Label fx:id="roleLabel"
+                           text="ADMIN"
+                           styleClass="role-badge"/>
+                    <Label fx:id="dateLabel"
+                           text="Loading..."
+                           styleClass="header-date"/>
+                </VBox>
+                <Button text="Logout"
+                        styleClass="btn-danger"
+                        onAction="#handleLogout"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ═══════════════════════════════════════
+         LEFT — Sidebar Navigation
+    ═══════════════════════════════════════ -->
+    <left>
+        <VBox styleClass="sidebar" spacing="6">
+            <padding><Insets top="30" right="16" bottom="30" left="16"/></padding>
+
+            <Label text="NAVIGATION" styleClass="sidebar-section-label"/>
+            <Region prefHeight="10"/>
+
+            <Button fx:id="btnDashboard" text="⬛  Dashboard"
+                    styleClass="nav-btn, nav-btn-active"
+                    maxWidth="Infinity"
+                    onAction="#showDashboard"/>
+            <Button fx:id="btnWorkshop" text="🔧  Workshop"
+                    styleClass="nav-btn"
+                    maxWidth="Infinity"
+                    onAction="#openWorkshop"/>
+            <Button fx:id="btnCustomer" text="👤  Customers"
+                    styleClass="nav-btn"
+                    maxWidth="Infinity"
+                    onAction="#openCustomer"/>
+            <Button fx:id="btnPolice" text="🚔  Police"
+                    styleClass="nav-btn"
+                    maxWidth="Infinity"
+                    onAction="#openPolice"/>
+            <Button fx:id="btnInsurance" text="🛡  Insurance"
+                    styleClass="nav-btn"
+                    maxWidth="Infinity"
+                    onAction="#openInsurance"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Label text="SYSTEM" styleClass="sidebar-section-label"/>
+            <Region prefHeight="10"/>
+
+            <!-- Progress Section -->
+            <VBox styleClass="progress-card" spacing="10">
+                <Label text="System Load" styleClass="stat-label"/>
+                <ProgressBar fx:id="systemProgressBar"
+                             progress="0.0"
+                             maxWidth="Infinity"
+                             styleClass="progress-bar"/>
+                <Label text="Database Activity"
+                       styleClass="stat-label"/>
+                <ProgressIndicator fx:id="dbProgressIndicator"
+                                   progress="-1"
+                                   prefWidth="40"
+                                   prefHeight="40"/>
+            </VBox>
+
+        </VBox>
+    </left>
+
+    <!-- ═══════════════════════════════════════
+         CENTER — Main Content
+    ═══════════════════════════════════════ -->
+    <center>
+        <ScrollPane styleClass="scroll-pane"
+                    fitToWidth="true"
+                    hbarPolicy="NEVER">
+            <VBox styleClass="main-content" spacing="24">
+                <padding>
+                    <Insets top="30" right="30" bottom="30" left="30"/>
+                </padding>
+
+                <!-- Page Title -->
+                <VBox spacing="4">
+                    <Label text="Dashboard Overview"
+                           styleClass="page-title"/>
+                    <Label text="Real-time system statistics and vehicle data"
+                           styleClass="page-subtitle"/>
+                </VBox>
+
+                <!-- ── STAT CARDS ROW ── -->
+                <HBox spacing="20">
+                    <VBox styleClass="stat-card" HBox.hgrow="ALWAYS"
+                          spacing="8">
+                        <Label text="TOTAL VEHICLES"
+                               styleClass="stat-label"/>
+                        <Label fx:id="totalVehicles"
+                               text="0"
+                               styleClass="stat-number"/>
+                        <Label text="Registered in system"
+                               styleClass="stat-label"/>
+                    </VBox>
+                    <VBox styleClass="stat-card" HBox.hgrow="ALWAYS"
+                          spacing="8">
+                        <Label text="TOTAL CUSTOMERS"
+                               styleClass="stat-label"/>
+                        <Label fx:id="totalCustomers"
+                               text="0"
+                               styleClass="stat-number"/>
+                        <Label text="Vehicle owners"
+                               styleClass="stat-label"/>
+                    </VBox>
+                    <VBox styleClass="stat-card" HBox.hgrow="ALWAYS"
+                          spacing="8">
+                        <Label text="UNPAID VIOLATIONS"
+                               styleClass="stat-label"/>
+                        <Label fx:id="totalViolations"
+                               text="0"
+                               styleClass="stat-number"/>
+                        <Label text="Pending fines"
+                               styleClass="stat-label"/>
+                    </VBox>
+                    <VBox styleClass="stat-card" HBox.hgrow="ALWAYS"
+                          spacing="8">
+                        <Label text="ACTIVE POLICIES"
+                               styleClass="stat-label"/>
+                        <Label fx:id="totalInsurance"
+                               text="0"
+                               styleClass="stat-number"/>
+                        <Label text="Insurance active"
+                               styleClass="stat-label"/>
+                    </VBox>
+                </HBox>
+
+                <!-- ── VEHICLES TABLE ── -->
+                <VBox styleClass="stat-card" spacing="16">
+                    <HBox alignment="CENTER_LEFT" spacing="16">
+                        <VBox HBox.hgrow="ALWAYS">
+                            <Label text="Registered Vehicles"
+                                   styleClass="section-title"/>
+                            <Label text="All vehicles in the system"
+                                   styleClass="page-subtitle"/>
+                        </VBox>
+                        <Button fx:id="addVehicleBtn"
+                                text="+ Add Vehicle"
+                                styleClass="btn-primary"
+                                onAction="#openWorkshop"/>
+                    </HBox>
+
+                    <TableView fx:id="vehicleTable"
+                               styleClass="table-view"
+                               prefHeight="280">
+                        <columns>
+                            <TableColumn fx:id="colReg"
+                                         text="Registration"
+                                         prefWidth="160"/>
+                            <TableColumn fx:id="colMake"
+                                         text="Make"
+                                         prefWidth="120"/>
+                            <TableColumn fx:id="colModel"
+                                         text="Model"
+                                         prefWidth="120"/>
+                            <TableColumn fx:id="colYear"
+                                         text="Year"
+                                         prefWidth="80"/>
+                            <TableColumn fx:id="colColor"
+                                         text="Color"
+                                         prefWidth="100"/>
+                            <TableColumn fx:id="colOwner"
+                                         text="Owner"
+                                         prefWidth="160"/>
+                        </columns>
+                        <placeholder>
+                            <Label text="No vehicles found"
+                                   style="-fx-text-fill: #555577;"/>
+                        </placeholder>
+                    </TableView>
+                </VBox>
+
+                <!-- ── PAGINATION + SCROLLPANE LIST ── -->
+                <HBox spacing="20">
+
+                    <!-- Recent Activity ScrollPane -->
+                    <VBox styleClass="stat-card" spacing="16"
+                          HBox.hgrow="ALWAYS">
+                        <Label text="Recent Activity"
+                               styleClass="section-title"/>
+                        <ScrollPane styleClass="scroll-pane"
+                                    prefHeight="280"
+                                    fitToWidth="true">
+                            <VBox fx:id="activityList" spacing="10">
+                                <padding>
+                                    <Insets top="8" right="8"
+                                            bottom="8" left="8"/>
+                                </padding>
+                            </VBox>
+                        </ScrollPane>
+                    </VBox>
+
+                    <!-- Violations with Pagination -->
+                    <VBox styleClass="stat-card" spacing="16"
+                          HBox.hgrow="ALWAYS">
+                        <Label text="Violations"
+                               styleClass="section-title"/>
+                        <TableView fx:id="violationTable"
+                                   styleClass="table-view"
+                                   prefHeight="220">
+                            <columns>
+                                <TableColumn fx:id="colViolationType"
+                                             text="Type"
+                                             prefWidth="140"/>
+                                <TableColumn fx:id="colViolationFine"
+                                             text="Fine (M)"
+                                             prefWidth="100"/>
+                                <TableColumn fx:id="colViolationStatus"
+                                             text="Status"
+                                             prefWidth="100"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No violations"
+                                       style="-fx-text-fill: #555577;"/>
+                            </placeholder>
+                        </TableView>
+                        <Pagination fx:id="violationPagination"
+                                    pageCount="1"
+                                    currentPageIndex="0"
+                                    styleClass="pagination"/>
+                    </VBox>
+
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

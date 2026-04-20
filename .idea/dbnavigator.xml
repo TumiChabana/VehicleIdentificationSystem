@@ -11,10 +11,10 @@
   </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
     <assistants>
-      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
+      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
         <tools />
       </assistant-state>
-      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
+      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
       </assistant-state>
     </assistants>
@@ -30,26 +30,26 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231">
-      <console name="VehicleIdentificationDB" type="STANDARD" schema="neondb" session="Main"><![CDATA[-- ============================================
+      <console name="VehicleIdentificationDB" type="STANDARD" schema="public" session="Main"><![CDATA[-- ============================================
 -- VEHICLE IDENTIFICATION SYSTEM
 -- Full Database Schema
 -- ============================================
 
-SET search_path TO public;
+ALTER DATABASE neondb SET search_path TO public;
 
 -- Clean slate if re-running
-DROP TABLE IF EXISTS insurance_record CASCADE;
-DROP TABLE IF EXISTS violation CASCADE;
-DROP TABLE IF EXISTS police_report CASCADE;
-DROP TABLE IF EXISTS customer_query CASCADE;
-DROP TABLE IF EXISTS service_record CASCADE;
-DROP TABLE IF EXISTS vehicle CASCADE;
-DROP TABLE IF EXISTS customer CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
+-- DROP TABLE IF EXISTS insurance_record CASCADE;
+-- DROP TABLE IF EXISTS violation CASCADE;
+-- DROP TABLE IF EXISTS police_report CASCADE;
+-- DROP TABLE IF EXISTS customer_query CASCADE;
+-- DROP TABLE IF EXISTS service_record CASCADE;
+-- DROP TABLE IF EXISTS vehicle CASCADE;
+-- DROP TABLE IF EXISTS customer CASCADE;
+-- DROP TABLE IF EXISTS users CASCADE;
 
 -- ============================================
 -- 1. USERS (Admin & access control)
--- ============================================
+-- ======================-- ======================
 CREATE TABLE users (
     user_id       SERIAL PRIMARY KEY,
     username      VARCHAR(50) UNIQUE NOT NULL,
@@ -331,9 +331,22 @@ FROM information_schema.tables
 WHERE table_schema = 'public'
 ORDER BY table_name;
 
+select * from users;
+
 SELECT COUNT(*) as customers FROM customer;
 SELECT COUNT(*) as vehicles FROM vehicle;
-SELECT COUNT(*) as users FROM users;]]></console>
+SELECT COUNT(*) as users FROM users;
+
+SELECT table_schema, table_name
+FROM information_schema.tables
+WHERE table_name = 'users';
+
+UPDATE users SET password_hash = 'admin' WHERE username = 'admin';
+UPDATE users SET password_hash = 'po01ic3' WHERE username = 'officer1';
+UPDATE users SET password_hash = 'w0rk5H0p' WHERE username = 'workshop1';
+UPDATE users SET password_hash = '1nsUr3' WHERE username = 'insurer1';
+
+COMMIT;]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -395,7 +408,7 @@ SELECT COUNT(*) as users FROM users;]]></console>
           <session-user value="neondb_owner" />
         </database>
         <properties>
-          <auto-commit value="false" />
+          <auto-commit value="true" />
           <properties>
             <property key="sslmode" value="require" />
           </properties>
