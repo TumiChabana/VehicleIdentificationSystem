@@ -1,0 +1,223 @@
+/* =============================================
+   LANDING.CSS — Landing page only
+   ============================================= */
+
+.landing-root {
+    -fx-pref-width:1000;
+    -fx-pref-height:900;
+}
+
+.landing-bg {
+    -fx-min-height: 100%;
+}
+
+/* ── NAV BAR ────────────────────────────────── */
+.landing-nav {
+    -fx-background-color:#ffffff15;
+    -fx-padding: 20 60 20 60;
+    -fx-border-color: #ffffff11;
+    -fx-border-width: 0 0 1 0;
+    -fx-min-height: 80;
+}
+
+
+.nav-logo-sub {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 25px;
+    -fx-font-family: "Georgia", serif;
+    -fx-font-weight: bold;
+    -fx-margin-top: 10;
+}
+
+.nav-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #aaaacc;
+    -fx-font-size: 15px;
+    -fx-cursor: hand;
+    -fx-padding: 8 16 8 16;
+    -fx-font-family: "Georgia", serif;
+    -fx-background-radius: 6;
+    -fx-border-color: transparent;
+}
+
+.nav-link:hover {
+    -fx-background-color: #ffffff11;
+    -fx-text-fill: #ffffff;
+}
+
+.nav-login-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e63946;
+    -fx-border-color: #e63946;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 28 10 28;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+     -fx-font-family: "Georgia", serif;
+}
+
+.nav-login-btn:hover {
+    -fx-background-color: #e63946;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, #e6394866, 16, 0.3, 0, 0);
+}
+
+/* ── HERO SECTION ───────────────────────────── */
+.hero-section {
+    -fx-min-height: 400;
+    -fx-pref-height:400;
+    -fx-background-color: transparent;
+}
+
+
+.hero-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size:57px;
+    -fx-font-weight: bold;
+     -fx-font-family: "Georgia", serif;
+    -fx-effect: dropshadow(gaussian, #00000088, 10, 0.2, 2, 2);
+    -fx-line-spacing: -10;
+}
+
+.hero-title-accent {
+    -fx-text-fill: #e63946;
+    -fx-font-size: 57px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Georgia", serif;
+    -fx-effect: dropshadow(gaussian, #00000088, 10, 0.2, 2, 2);
+}
+
+.hero-desc {
+    -fx-text-fill: #8888aa;
+    -fx-font-size: 16px;
+    -fx-font-family: "Georgia", serif;
+    -fx-padding: 4 0 0 0;
+}
+
+.hero-btn-primary {
+    -fx-background-color: #e63946;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-padding: 16 40 16 40;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-font-family: "Georgia", serif;
+    -fx-effect: dropshadow(gaussian, #00000088, 10, 0.2, 2, 2);
+}
+
+.hero-btn-primary:hover {
+    -fx-background-color: #ff4d5a;
+
+}
+
+.hero-btn-secondary {
+    -fx-background-color: #ffffff11;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 15px;
+    -fx-padding: 16 40 16 40;
+    -fx-background-radius: 10;
+    -fx-border-color: #ffffff22;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-font-family: "Georgia", serif;
+}
+
+.hero-btn-secondary:hover {
+    -fx-background-color: #ffffff22;
+}
+
+/* Hero stats */
+.hero-stat-num {
+    -fx-text-fill: #e63946;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Georgia", serif;
+}
+
+.hero-stat-label {
+    -fx-text-fill: #8888aa;
+    -fx-font-size: 13px;
+    -fx-font-family: "Georgia", serif;
+}
+
+
+
+/* ── MODULE CARDS ───────────────────────────── */
+
+.module-card {
+    -fx-background-color: #ffffff17;
+    -fx-background-radius: 16;
+    -fx-border-color: #ffffff15;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-padding: 10 24 28 24;
+    -fx-min-height: 220;
+    -fx-effect: dropshadow(gaussian, #00000066, 20, 0.3, 0, 4);
+}
+
+.module-card:hover {
+    -fx-background-color: #ffffff13;
+    -fx-border-color: #e6394644;
+    -fx-effect: dropshadow(gaussian, #e6394644, 24, 0.3, 0, 6);
+}
+
+.module-number {
+    -fx-text-fill: #e63946;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Georgia", serif;
+    -fx-opacity: 0.7;
+}
+
+.module-icon {
+    -fx-font-size: 28px;
+}
+
+.module-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Georgia", serif;
+}
+
+.module-desc {
+    -fx-text-fill: #8888aa;
+    -fx-font-size: 13px;
+    -fx-wrap-text: true;
+    -fx-font-family: "Georgia", serif;
+}
+
+.module-btn-outline {
+    -fx-background-color: transparent;
+    -fx-text-fill: #aaaacc;
+    -fx-border-color: #444466;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 20 8 20;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+
+.module-btn-outline:hover {
+    -fx-border-color: #aaaacc;
+    -fx-text-fill: #ffffff;
+}
+
+.module-btn-filled {
+    -fx-background-color: #e63946;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 8 20 8 20;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.module-btn-filled:hover {
+    -fx-background-color: #ff4d5a;
+}

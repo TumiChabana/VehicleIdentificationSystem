@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.vis.controller.LandingController"
+           styleClass="landing-root"
+           stylesheets="@../styles/landing.css">
+
+    <!-- ═══ LAYER 1: Background Image ═══ -->
+    <ImageView fx:id="bgImage"
+               preserveRatio="false"
+               fitWidth="1000"
+               fitHeight="900"
+               StackPane.alignment="CENTER">
+        <image>
+            <Image url="@/images/car_bg.jpg"/>
+        </image>
+    </ImageView>
+
+    <!-- ═══ LAYER 2: Dark Gradient Overlay ═══ -->
+    <!-- This darkens the image so text is readable -->
+    <VBox styleClass="landing-overlay"/>
+
+    <!-- ═══ LAYER 3: All Content ═══ -->
+    <VBox styleClass="landing-bg">
+
+        <!-- ── TOP NAV BAR ── -->
+        <HBox styleClass="landing-nav" alignment="CENTER_LEFT" spacing="40">
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <ImageView fitHeight="50" fitWidth="50"
+                           pickOnBounds="true" preserveRatio="true" >
+                    <image>
+                        <Image url="/images/logo3.png"/>
+                    </image>
+                </ImageView>
+
+                <VBox>
+                    <Label text="NVis"
+                           styleClass="nav-logo-sub"/>
+
+                </VBox>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Button text="Home" styleClass="nav-link"
+                    onAction="#scrollToTop"/>
+            <Button text="Modules" styleClass="nav-link"
+                    onAction="#scrollToModules"/>
+            <Button text="About" styleClass="nav-link"
+                    onAction="#scrollToAbout"/>
+            <Button text="Contact" styleClass="nav-link"
+                    onAction="#scrollToContact"/>
+
+            <Region prefWidth="20"/>
+
+            <Button fx:id="loginNavBtn"
+                    text="Login"
+                    styleClass="nav-login-btn"
+                    onAction="#goToLogin"/>
+        </HBox>
+
+        <!-- ── HERO SECTION ── -->
+        <VBox styleClass="hero-section" VBox.vgrow="ALWAYS"
+              alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="0" right="120" bottom="0" left="120"/>
+            </padding>
+
+            <Label text="NATIONAL VEHICLE"
+                   styleClass="hero-title"/>
+            <Label text="IDENTIFICATION"
+                   styleClass="hero-title"/>
+            <Label text="SYSTEM"
+                   styleClass="hero-title-accent"/>
+
+            <Label text="Empowering law enforcement, insurance providers,"
+                   styleClass="hero-desc"/>
+            <Label text="and vehicle owners with real-time intelligence."
+                   styleClass="hero-desc"/>
+
+            <Region prefHeight="30"/>
+
+            <HBox spacing="16" alignment="CENTER_LEFT">
+                <Button fx:id="getStartedBtn"
+                        text="Access System"
+                        styleClass="hero-btn-primary"
+                        onAction="#goToLogin"/>
+                <Button text="Learn More"
+                        styleClass="hero-btn-secondary"
+                        onAction="#scrollToModules"/>
+            </HBox>
+
+
+        </VBox>
+
+        <!-- ── MODULE CARDS ROW ── -->
+        <HBox fx:id="modulesSection"
+              styleClass="modules-row"
+              spacing="20" alignment="CENTER">
+            <padding>
+                <Insets top="40" right="60" bottom="110" left="60"/>
+            </padding>
+
+            <!-- Workshop Card -->
+            <VBox styleClass="module-card" HBox.hgrow="ALWAYS"
+                  spacing="10">
+                <Label text="01" styleClass="module-number"/>
+                <Label text="🔧" styleClass="module-icon"/>
+                <Label text="Workshop" styleClass="module-title"/>
+                <Label text="Vehicle registration and full service history tracking"
+                       styleClass="module-desc" wrapText="true"/>
+                <Region VBox.vgrow="ALWAYS"/>
+                <HBox spacing="10" >
+                    <padding>
+                        <Insets top="0" right="0" bottom="5" left="0"/>
+                    </padding>
+                    <Button text="Learn More"
+                            styleClass="module-btn-outline"/>
+                    <Button text="Access"
+                            styleClass="module-btn-filled"
+                            onAction="#goToLogin"/>
+                </HBox>
+            </VBox>
+
+            <!-- Customer Card -->
+            <VBox styleClass="module-card" HBox.hgrow="ALWAYS"
+                  spacing="10">
+                <Label text="02" styleClass="module-number"/>
+                <Label text="👤" styleClass="module-icon"/>
+                <Label text="Customer" styleClass="module-title"/>
+                <Label text="Owner information, vehicle queries and condition reports"
+                       styleClass="module-desc" wrapText="true"/>
+                <Region VBox.vgrow="ALWAYS"/>
+                <HBox spacing="10">
+                    <Button text="Learn More"
+                            styleClass="module-btn-outline"/>
+                    <Button text="Access"
+                            styleClass="module-btn-filled"
+                            onAction="#goToLogin"/>
+                </HBox>
+            </VBox>
+
+            <!-- Police Card -->
+            <VBox styleClass="module-card" HBox.hgrow="ALWAYS"
+                  spacing="10">
+                <Label text="03" styleClass="module-number"/>
+                <Label text="🚔" styleClass="module-icon"/>
+                <Label text="Police" styleClass="module-title"/>
+                <Label text="Violations, theft reports and law enforcement records"
+                       styleClass="module-desc" wrapText="true"/>
+                <Region VBox.vgrow="ALWAYS"/>
+                <HBox spacing="10">
+                    <Button text="Learn More"
+                            styleClass="module-btn-outline"/>
+                    <Button text="Access"
+                            styleClass="module-btn-filled"
+                            onAction="#goToLogin"/>
+                </HBox>
+            </VBox>
+
+            <!-- Insurance Card -->
+            <VBox styleClass="module-card" HBox.hgrow="ALWAYS"
+                  spacing="10">
+                <Label text="04" styleClass="module-number"/>
+                <Label text="🛡" styleClass="module-icon"/>
+                <Label text="Insurance" styleClass="module-title"/>
+                <Label text="Policy management, premium tracking and status"
+                       styleClass="module-desc" wrapText="true"/>
+                <Region VBox.vgrow="ALWAYS"/>
+                <HBox spacing="10">
+                    <Button text="Learn More"
+                            styleClass="module-btn-outline"/>
+                    <Button text="Access"
+                            styleClass="module-btn-filled"
+                            onAction="#goToLogin"/>
+                </HBox>
+            </VBox>
+
+        </HBox>
+
+    </VBox>
+
+</StackPane>

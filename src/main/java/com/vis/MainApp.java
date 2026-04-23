@@ -3,6 +3,7 @@ package com.vis;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -13,16 +14,9 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/fxml/Login.fxml")
+                getClass().getResource("/fxml/Landing.fxml")
         );
         Scene scene = new Scene(loader.load());
-        URL cssUrl = getClass().getResource("/styles/login.css");
-        if (cssUrl != null) {
-            scene.getStylesheets().add(cssUrl.toExternalForm());
-            System.out.println("✅ CSS loaded: " + cssUrl);
-        } else {
-            System.err.println("❌ CSS not found — check file location");
-        }
 
         Font.loadFont(
                 getClass().getResourceAsStream("/Fonts/BebasNeue-Regular.ttf"), 14
@@ -31,6 +25,18 @@ public class MainApp extends Application {
         System.out.println(
                 getClass().getResource("/images/car_bg.jpg")
         );
+
+        URL base    = getClass().getResource("/styles/base.css");
+        URL landing = getClass().getResource("/styles/landing.css");
+        if (base    != null) scene.getStylesheets()
+                .add(base.toExternalForm());
+        if (landing != null) scene.getStylesheets()
+                .add(landing.toExternalForm());
+
+        URL image = getClass().getResource("/images/logo3.png");
+
+        Image icon= new Image(image.openStream());
+        stage.getIcons().add(icon);
 
         stage.setTitle("Vehicle Identification System");
         stage.setScene(scene);

@@ -124,6 +124,32 @@ public class VehicleDAO {
         }
     }
 
+    public List<Vehicle> getAllVehiclesWithOwners() {
+        List<Vehicle> list = new ArrayList<>();
+        String sql = """
+        SELECT v.*, c.name as owner_name
+        FROM vehicle v
+        LEFT JOIN customer c ON v.owner_id = c.customer_id
+        ORDER BY v.vehicle_id
+        """;
+
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Vehicle v = mapRow(rs);
+                v.setOwnerName(rs.getString("owner_name"));
+                list.add(v);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching vehicles: "
+                    + e.getMessage());
+        }
+        return list;
+    }
+
     // MAP DATABASE ROW → Vehicle object
     private Vehicle mapRow(ResultSet rs) throws SQLException {
         return new Vehicle(

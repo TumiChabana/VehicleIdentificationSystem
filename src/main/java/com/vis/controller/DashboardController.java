@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -65,30 +66,33 @@ public class DashboardController implements Initializable {
     @FXML private VBox activityList;
 
     // ── DAOs ─────────────────────────────────────
-    private final VehicleDAO vehicleDAO       = new VehicleDAO();
-    private final CustomerDAO customerDAO     = new CustomerDAO();
-    private final PoliceDAO policeDAO         = new PoliceDAO();
-    private final InsuranceDAO insuranceDAO   = new InsuranceDAO();
+    private final VehicleDAO vehicleDAO     = new VehicleDAO();
+    private final CustomerDAO customerDAO   = new CustomerDAO();
+    private final PoliceDAO policeDAO       = new PoliceDAO();
+    private final InsuranceDAO insuranceDAO = new InsuranceDAO();
 
     private User currentUser;
     private List<Violation> allViolations;
     private static final int VIOLATIONS_PER_PAGE = 5;
 
-    // ─────────────────────────────────────────────
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupDate();
         setupTableColumns();
         setupDropShadow();
-        setupProgressAnimation();
     }
 
-    // Called after login — receives logged-in user
     public void initUser(User user) {
         this.currentUser = user;
         welcomeLabel.setText("Welcome, " + user.getUsername());
         roleLabel.setText(user.getRole());
-        loadDashboardData();
+
+        // Show spinner while loading
+        dbProgressIndicator.setProgress(-1);
+        systemProgressBar.setProgress(0);
+
+        // Load data in background — no more freezing
+        loadDashboardDataAsync();
         populateActivityList();
     }
 
@@ -101,9 +105,11 @@ public class DashboardController implements Initializable {
     }
 
     private void setupTableColumns() {
-        // Vehicle table columns
+        // Vehicle table — no DB calls in cell factories
+
         colReg.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getRegistrationNumber()));
+                new SimpleStringProperty(
+                        d.getValue().getRegistrationNumber()));
         colMake.setCellValueFactory(d ->
                 new SimpleStringProperty(d.getValue().getMake()));
         colModel.setCellValueFactory(d ->
@@ -113,16 +119,21 @@ public class DashboardController implements Initializable {
                         String.valueOf(d.getValue().getYear())));
         colColor.setCellValueFactory(d ->
                 new SimpleStringProperty(d.getValue().getColor()));
-        colOwner.setCellValueFactory(d -> {
-            Customer c = customerDAO.getCustomerById(
-                    d.getValue().getOwnerId());
-            return new SimpleStringProperty(
-                    c != null ? c.getName() : "Unknown");
-        });
 
-        // Violation table columns
+
+
+        // ⚠️ Owner column — we'll populate this from
+        // pre-loaded data, not per-row DB calls
+        colOwner.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getOwnerName() != null
+                                ? d.getValue().getOwnerName()
+                                : "—"));
+
+        // Violation table
         colViolationType.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getViolationType()));
+                new SimpleStringProperty(
+                        d.getValue().getViolationType()));
         colViolationFine.setCellValueFactory(d ->
                 new SimpleStringProperty(
                         "M " + d.getValue().getFineAmount()));
@@ -130,27 +141,25 @@ public class DashboardController implements Initializable {
                 new SimpleStringProperty(d.getValue().getStatus()));
 
         // Color code violation status
-        colViolationStatus.setCellFactory(col ->
-                new TableCell<>() {
-                    @Override
-                    protected void updateItem(String item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty || item == null) {
-                            setText(null);
-                            setStyle("");
-                        } else {
-                            setText(item);
-                            setStyle("Unpaid".equals(item)
-                                    ? "-fx-text-fill: #e63946; -fx-font-weight: bold;"
-                                    : "-fx-text-fill: #44cc88; -fx-font-weight: bold;"
-                            );
-                        }
-                    }
-                });
+        colViolationStatus.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    setText(item);
+                    setStyle("Unpaid".equals(item)
+                            ? "-fx-text-fill: #e63946; -fx-font-weight: bold;"
+                            : "-fx-text-fill: #44cc88; -fx-font-weight: bold;"
+                    );
+                }
+            }
+        });
     }
 
     private void setupDropShadow() {
-        // DropShadow on Add Vehicle button (marks requirement)
         DropShadow shadow = new DropShadow();
         shadow.setColor(Color.web("#e63946"));
         shadow.setRadius(18);
@@ -158,58 +167,97 @@ public class DashboardController implements Initializable {
         addVehicleBtn.setEffect(shadow);
     }
 
-    private void setupProgressAnimation() {
-        // Animate progress bar to simulate system load
+    // ── ASYNC DATA LOADING ────────────────────────
+    // This is the key fix — all DB work happens off the UI thread
+
+    private void loadDashboardDataAsync() {
+
+        Task<DashboardData> task = new Task<>() {
+            @Override
+            protected DashboardData call() {
+                // This runs on a BACKGROUND thread
+                // Safe to do slow DB operations here
+                DashboardData data = new DashboardData();
+
+                updateMessage("Loading vehicles...");
+                data.vehicles  = vehicleDAO.getAllVehiclesWithOwners();
+
+                updateMessage("Loading customers...");
+                data.customers = customerDAO.getAllCustomers();
+
+                updateMessage("Loading violations...");
+                data.violations = policeDAO.getAllViolations();
+
+                updateMessage("Loading insurance...");
+                data.insurance  = insuranceDAO.getAllRecords();
+
+                return data;
+            }
+        };
+
+        // Runs on UI thread when task SUCCEEDS
+        task.setOnSucceeded(e -> {
+            DashboardData data = task.getValue();
+            updateDashboardUI(data);
+            // Stop spinner, animate progress bar
+            dbProgressIndicator.setProgress(1.0);
+            animateProgressBar();
+        });
+
+        // Runs on UI thread when task FAILS
+        task.setOnFailed(e -> {
+            dbProgressIndicator.setProgress(0);
+            System.err.println("Dashboard load failed: "
+                    + task.getException().getMessage());
+        });
+
+        // Start the background thread
+        Thread thread = new Thread(task);
+        thread.setDaemon(true); // dies when app closes
+        thread.start();
+    }
+
+    // ── UI UPDATE — always runs on UI thread ──────
+
+    private void updateDashboardUI(DashboardData data) {
+        // Vehicles
+        vehicleTable.setItems(
+                FXCollections.observableArrayList(data.vehicles));
+        totalVehicles.setText(
+                String.valueOf(data.vehicles.size()));
+
+        // Customers
+        totalCustomers.setText(
+                String.valueOf(data.customers.size()));
+
+        // Violations
+        allViolations = data.violations;
+        long unpaid = data.violations.stream()
+                .filter(v -> "Unpaid".equals(v.getStatus()))
+                .count();
+        totalViolations.setText(String.valueOf(unpaid));
+        setupViolationPagination();
+
+        // Insurance
+        long active = data.insurance.stream()
+                .filter(i -> "Active".equals(i.getStatus()))
+                .count();
+        totalInsurance.setText(String.valueOf(active));
+    }
+
+    private void animateProgressBar() {
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.ZERO,
-                        new KeyValue(systemProgressBar.progressProperty(), 0)),
-                new KeyFrame(Duration.seconds(3),
-                        new KeyValue(systemProgressBar.progressProperty(), 0.72))
+                        new KeyValue(
+                                systemProgressBar.progressProperty(), 0)),
+                new KeyFrame(Duration.seconds(2),
+                        new KeyValue(
+                                systemProgressBar.progressProperty(), 0.72))
         );
-        timeline.setDelay(Duration.seconds(1));
         timeline.play();
-
-        // Stop spinner after data loads
-        dbProgressIndicator.setProgress(-1); // spinning
-        new Timeline(new KeyFrame(Duration.seconds(3),
-                e -> dbProgressIndicator.setProgress(1.0)
-        )).play();
     }
 
-    // ── DATA LOADING ──────────────────────────────
-
-    private void loadDashboardData() {
-        try {
-            // Load vehicles
-            List<Vehicle> vehicles = vehicleDAO.getAllVehicles();
-            vehicleTable.setItems(
-                    FXCollections.observableArrayList(vehicles));
-            totalVehicles.setText(String.valueOf(vehicles.size()));
-
-            // Load customers count
-            List<Customer> customers = customerDAO.getAllCustomers();
-            totalCustomers.setText(String.valueOf(customers.size()));
-
-            // Load violations with pagination
-            allViolations = policeDAO.getAllViolations();
-            totalViolations.setText(
-                    String.valueOf(allViolations.stream()
-                            .filter(v -> "Unpaid".equals(v.getStatus()))
-                            .count()));
-            setupViolationPagination();
-
-            // Load insurance count
-            List<InsuranceRecord> insurance =
-                    insuranceDAO.getAllRecords();
-            totalInsurance.setText(
-                    String.valueOf(insurance.stream()
-                            .filter(i -> "Active".equals(i.getStatus()))
-                            .count()));
-
-        } catch (Exception e) {
-            System.err.println("Dashboard load error: " + e.getMessage());
-        }
-    }
+    // ── PAGINATION ────────────────────────────────
 
     private void setupViolationPagination() {
         if (allViolations == null || allViolations.isEmpty()) return;
@@ -217,11 +265,9 @@ public class DashboardController implements Initializable {
         int pageCount = (int) Math.ceil(
                 (double) allViolations.size() / VIOLATIONS_PER_PAGE);
         violationPagination.setPageCount(Math.max(pageCount, 1));
-
         violationPagination.currentPageIndexProperty()
                 .addListener((obs, oldVal, newVal) ->
                         loadViolationPage(newVal.intValue()));
-
         loadViolationPage(0);
     }
 
@@ -229,15 +275,15 @@ public class DashboardController implements Initializable {
         int from = pageIndex * VIOLATIONS_PER_PAGE;
         int to   = Math.min(from + VIOLATIONS_PER_PAGE,
                 allViolations.size());
-
         ObservableList<Violation> page =
                 FXCollections.observableArrayList(
                         allViolations.subList(from, to));
         violationTable.setItems(page);
     }
 
+    // ── ACTIVITY LIST ─────────────────────────────
+
     private void populateActivityList() {
-        // ScrollPane activity feed — 20+ items (marks requirement)
         activityList.getChildren().clear();
         String[] activities = {
                 "🚗 Vehicle LSO-001-AA registered",
@@ -267,6 +313,7 @@ public class DashboardController implements Initializable {
         for (int i = 0; i < activities.length; i++) {
             HBox item = new HBox();
             item.getStyleClass().add("activity-item");
+            item.setSpacing(8);
 
             VBox content = new VBox(4);
             Label text = new Label(activities[i]);
@@ -274,19 +321,20 @@ public class DashboardController implements Initializable {
 
             Label time = new Label(
                     LocalDate.now().minusDays(i)
-                            .format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
+                            .format(DateTimeFormatter
+                                    .ofPattern("dd MMM yyyy")));
             time.getStyleClass().add("activity-time");
 
             content.getChildren().addAll(text, time);
             item.getChildren().add(content);
 
-            // Fade in each item with delay
+            // Staggered fade in
             item.setOpacity(0);
             FadeTransition ft = new FadeTransition(
                     Duration.millis(300), item);
             ft.setFromValue(0);
             ft.setToValue(1);
-            ft.setDelay(Duration.millis(i * 50));
+            ft.setDelay(Duration.millis(i * 40L));
             ft.play();
 
             activityList.getChildren().add(item);
@@ -295,7 +343,10 @@ public class DashboardController implements Initializable {
 
     // ── NAVIGATION ────────────────────────────────
 
-    @FXML private void handleRefresh() { loadDashboardData(); }
+    @FXML private void handleRefresh() {
+        dbProgressIndicator.setProgress(-1);
+        loadDashboardDataAsync();
+    }
 
     @FXML private void showDashboard() {}
 
@@ -306,10 +357,9 @@ public class DashboardController implements Initializable {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/Login.fxml"));
             Scene scene = new Scene(loader.load());
-            scene.getStylesheets().add(
-                    getClass().getResource("/styles/theme.css")
-                            .toExternalForm());
-            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            applyStyles(scene, "/styles/login.css");
+            Stage stage = (Stage) welcomeLabel
+                    .getScene().getWindow();
             stage.setScene(scene);
             stage.setMaximized(true);
         } catch (Exception e) {
@@ -319,41 +369,77 @@ public class DashboardController implements Initializable {
 
     @FXML private void handleExit() { Platform.exit(); }
 
-    // Module navigation — placeholders for now
-    // We'll fill these as we build each module
-    @FXML private void openWorkshop()  { navigateTo("/fxml/Workshop.fxml"); }
-    @FXML private void openCustomer()  { navigateTo("/fxml/Customer.fxml"); }
-    @FXML private void openPolice()    { navigateTo("/fxml/Police.fxml"); }
-    @FXML private void openInsurance() { navigateTo("/fxml/Insurance.fxml"); }
-    @FXML private void openAdmin()     { navigateTo("/fxml/Admin.fxml"); }
+    @FXML private void openWorkshop() {
+        navigateTo("/fxml/Workshop.fxml", "/styles/workshop.css");
+    }
+    @FXML private void openCustomer() {
+        navigateTo("/fxml/Customer.fxml", "/styles/customer.css");
+    }
+    @FXML private void openPolice() {
+        navigateTo("/fxml/Police.fxml", "/styles/police.css");
+    }
+    @FXML private void openInsurance() {
+        navigateTo("/fxml/Insurance.fxml", "/styles/insurance.css");
+    }
+    @FXML private void openAdmin() {
+        navigateTo("/fxml/Admin.fxml", "/styles/dashboard.css");
+    }
 
-    private void navigateTo(String fxmlPath) {
+    private void navigateTo(String fxmlPath, String cssPath) {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource(fxmlPath));
             Scene scene = new Scene(loader.load());
-            scene.getStylesheets().add(
-                    getClass().getResource("/styles/theme.css")
-                            .toExternalForm());
+            applyStyles(scene, cssPath);
 
-            // Pass current user to next controller
             Object controller = loader.getController();
             if (controller instanceof BaseModuleController) {
-                ((BaseModuleController) controller).initUser(currentUser);
+                ((BaseModuleController) controller)
+                        .initUser(currentUser);
             }
 
-            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setMaximized(true);
+            Stage stage = (Stage) welcomeLabel
+                    .getScene().getWindow();
+
+            // Smooth fade transition between screens
+            FadeTransition fade = new FadeTransition(
+                    Duration.millis(300),
+                    stage.getScene().getRoot());
+            fade.setFromValue(1.0);
+            fade.setToValue(0.0);
+            fade.setOnFinished(e -> {
+                stage.setScene(scene);
+                stage.setMaximized(true);
+                FadeTransition fadeIn = new FadeTransition(
+                        Duration.millis(300), scene.getRoot());
+                fadeIn.setFromValue(0.0);
+                fadeIn.setToValue(1.0);
+                fadeIn.play();
+            });
+            fade.play();
+
         } catch (Exception e) {
-            System.err.println("Navigation error: " + e.getMessage());
+            System.err.println("Navigation error: "
+                    + e.getMessage());
         }
     }
 
     private void applyStyles(Scene scene, String pageCSS) {
         URL base = getClass().getResource("/styles/base.css");
         URL page = getClass().getResource(pageCSS);
-        if (base != null) scene.getStylesheets().add(base.toExternalForm());
-        if (page != null) scene.getStylesheets().add(page.toExternalForm());
+        if (base != null)
+            scene.getStylesheets().add(base.toExternalForm());
+        if (page != null)
+            scene.getStylesheets().add(page.toExternalForm());
+    }
+
+    // ── INNER CLASS — bundles all loaded data ─────
+    // Keeps the Task clean and type-safe
+
+    private static class DashboardData {
+        List<Vehicle>         vehicles;
+        List<Customer>        customers;
+        List<Violation>       violations;
+        List<InsuranceRecord> insurance;
     }
 }

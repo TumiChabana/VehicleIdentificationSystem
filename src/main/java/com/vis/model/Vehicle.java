@@ -9,7 +9,7 @@ public class Vehicle {
     private int year;
     private String color;
     private int ownerId;
-
+    private String ownerName;
     public Vehicle() {}
 
     public Vehicle(int vehicleId, String registrationNumber, String make,
@@ -43,6 +43,12 @@ public class Vehicle {
 
     public int getOwnerId() { return ownerId; }
     public void setOwnerId(int ownerId) { this.ownerId = ownerId; }
+
+    // Add getter and setter
+    public String getOwnerName() { return ownerName; }
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
 
     @Override
     public String toString() {
