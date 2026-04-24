@@ -1,13 +1,337 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.CustomerController"
-            style="-fx-background-color: #0d0d1a;">
+            styleClass="root-pane">
+
+    <!-- ═══ TOP ═══ -->
+    <top>
+        <VBox>
+            <MenuBar styleClass="menu-bar">
+                <Menu text="File">
+                    <MenuItem text="Refresh"
+                              onAction="#handleRefresh"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Exit"
+                              onAction="#handleExit"/>
+                </Menu>
+                <Menu text="Modules">
+                    <MenuItem text="⬛  Dashboard"
+                              onAction="#goToDashboard"/>
+                    <MenuItem text="🔧  Workshop"
+                              onAction="#openWorkshop"/>
+                    <MenuItem text="🚔  Police"
+                              onAction="#openPolice"/>
+                    <MenuItem text="🛡  Insurance"
+                              onAction="#openInsurance"/>
+                </Menu>
+            </MenuBar>
+
+            <!-- Header -->
+            <HBox styleClass="top-header"
+                  alignment="CENTER_LEFT" spacing="20">
+                <Label text="VIS" styleClass="header-logo"/>
+                <VBox>
+                    <Label text="CUSTOMER MODULE"
+                           styleClass="header-title"/>
+                    <Label text="Owner Information &amp; Vehicle Queries"
+                           styleClass="header-sub"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="userLabel"
+                       text=""
+                       styleClass="role-badge"/>
+                <Button text="← Dashboard"
+                        styleClass="btn-secondary"
+                        onAction="#goToDashboard"/>
+                <Button text="Logout"
+                        styleClass="btn-danger"
+                        onAction="#handleLogout"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ═══ CENTER ═══ -->
     <center>
-        <Label text="Customer Module — Coming Soon"
-               style="-fx-text-fill: white; -fx-font-size: 24px;"/>
+        <VBox styleClass="main-content">
+
+            <TabPane fx:id="customerTabs"
+                     styleClass="module-tabs"
+                     VBox.vgrow="ALWAYS">
+
+                <!-- ══════════════════════════
+                     TAB 1 — CUSTOMERS
+                ══════════════════════════ -->
+                <Tab text="👤  Customers" closable="false">
+                    <SplitPane dividerPositions="0.62"
+                               styleClass="split-pane">
+
+                        <!-- LEFT: Customer Table -->
+                        <VBox styleClass="panel-card" spacing="14">
+                            <padding>
+                                <Insets top="20" right="20"
+                                        bottom="20" left="20"/>
+                            </padding>
+
+                            <HBox spacing="12"
+                                  alignment="CENTER_LEFT">
+                                <TextField
+                                        fx:id="customerSearchField"
+                                        promptText="🔍  Search by name, phone or email..."
+                                        styleClass="form-field"
+                                        HBox.hgrow="ALWAYS"
+                                        onKeyReleased="#handleCustomerSearch"/>
+                                <Button text="+ Add Customer"
+                                        styleClass="btn-primary"
+                                        onAction="#handleAddCustomer"/>
+                                <Button text="Clear"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleClearCustomer"/>
+                            </HBox>
+
+                            <TableView fx:id="customerTable"
+                                       styleClass="table-view"
+                                       VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colName"
+                                                 text="Name"/>
+                                    <TableColumn fx:id="colPhone"
+                                                 text="Phone"/>
+                                    <TableColumn fx:id="colEmail"
+                                                 text="Email"/>
+                                    <TableColumn fx:id="colAddress"
+                                                 text="Address"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No customers found"
+                                           style="-fx-text-fill: #555577;"/>
+                                </placeholder>
+                            </TableView>
+
+                            <HBox spacing="10">
+                                <Button text="✏ Edit Selected"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleEditCustomer"/>
+                                <Button text="🗑 Delete Selected"
+                                        styleClass="btn-danger"
+                                        onAction="#handleDeleteCustomer"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="customerStatusLabel"
+                                       text=""
+                                       styleClass="success-label"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- RIGHT: Customer Form -->
+                        <ScrollPane styleClass="scroll-pane"
+                                    fitToWidth="true">
+                            <VBox styleClass="panel-card"
+                                  spacing="16">
+                                <padding>
+                                    <Insets top="20" right="24"
+                                            bottom="20" left="24"/>
+                                </padding>
+
+                                <Label fx:id="customerFormTitle"
+                                       text="Add New Customer"
+                                       styleClass="section-title"/>
+
+                                <Label text="FULL NAME"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="fieldName"
+                                           promptText="e.g. Litumeleng Mokoena"
+                                           styleClass="form-field"/>
+
+                                <Label text="PHONE NUMBER"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="fieldPhone"
+                                           promptText="e.g. +266 5812 3456"
+                                           styleClass="form-field"/>
+
+                                <Label text="EMAIL ADDRESS"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="fieldEmail"
+                                           promptText="e.g. name@email.com"
+                                           styleClass="form-field"/>
+
+                                <Label text="ADDRESS"
+                                       styleClass="field-label"/>
+                                <TextArea fx:id="fieldAddress"
+                                          promptText="e.g. 12 Moshoeshoe Rd, Maseru"
+                                          styleClass="form-field"
+                                          prefHeight="80"
+                                          wrapText="true"/>
+
+                                <Region prefHeight="10"/>
+
+                                <Button fx:id="customerSaveBtn"
+                                        text="SAVE CUSTOMER"
+                                        styleClass="btn-primary"
+                                        maxWidth="Infinity"
+                                        onAction="#handleSaveCustomer"/>
+
+                                <Label fx:id="customerFormStatus"
+                                       text=""
+                                       styleClass="success-label"
+                                       wrapText="true"/>
+
+                            </VBox>
+                        </ScrollPane>
+
+                    </SplitPane>
+                </Tab>
+
+                <!-- ══════════════════════════
+                     TAB 2 — QUERIES
+                ══════════════════════════ -->
+                <Tab text="💬  Vehicle Queries" closable="false">
+                    <SplitPane dividerPositions="0.62"
+                               styleClass="split-pane">
+
+                        <!-- LEFT: Queries Table -->
+                        <VBox styleClass="panel-card" spacing="14">
+                            <padding>
+                                <Insets top="20" right="20"
+                                        bottom="20" left="20"/>
+                            </padding>
+
+                            <!-- Filter row -->
+                            <HBox spacing="12"
+                                  alignment="CENTER_LEFT">
+                                <ComboBox fx:id="queryCustomerFilter"
+                                          promptText="Filter by customer..."
+                                          styleClass="form-combo"
+                                          prefWidth="240"
+                                          onAction="#handleQueryFilter"/>
+                                <Button text="+ New Query"
+                                        styleClass="btn-primary"
+                                        onAction="#handleNewQuery"/>
+                                <Button text="Clear"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleClearQuery"/>
+                            </HBox>
+
+                            <!-- Queries table with pagination -->
+                            <TableView fx:id="queryTable"
+                                       styleClass="table-view"
+                                       VBox.vgrow="ALWAYS"
+                                       onMouseClicked="#handleQuerySelected">
+                                <columns>
+                                    <TableColumn fx:id="colQCustomer"
+                                                 text="Customer"/>
+                                    <TableColumn fx:id="colQVehicle"
+                                                 text="Vehicle"/>
+                                    <TableColumn fx:id="colQDate"
+                                                 text="Date"/>
+                                    <TableColumn fx:id="colQStatus"
+                                                 text="Status"/>
+                                    <TableColumn fx:id="colQText"
+                                                 text="Query"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No queries found"
+                                           style="-fx-text-fill: #555577;"/>
+                                </placeholder>
+                            </TableView>
+
+                            <Pagination fx:id="queryPagination"
+                                        pageCount="1"
+                                        styleClass="pagination"/>
+
+                            <HBox spacing="10">
+                                <Button text="🗑 Delete Selected"
+                                        styleClass="btn-danger"
+                                        onAction="#handleDeleteQuery"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="queryStatusLabel"
+                                       text=""
+                                       styleClass="success-label"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- RIGHT: Query Form + Response -->
+                        <ScrollPane styleClass="scroll-pane"
+                                    fitToWidth="true">
+                            <VBox styleClass="panel-card"
+                                  spacing="16">
+                                <padding>
+                                    <Insets top="20" right="24"
+                                            bottom="20" left="24"/>
+                                </padding>
+
+                                <Label fx:id="queryFormTitle"
+                                       text="New Query"
+                                       styleClass="section-title"/>
+
+                                <Label text="CUSTOMER"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="queryCustomerCombo"
+                                          promptText="Select customer..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Label text="VEHICLE"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="queryVehicleCombo"
+                                          promptText="Select vehicle..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Label text="QUERY DATE"
+                                       styleClass="field-label"/>
+                                <DatePicker fx:id="queryDatePicker"
+                                            styleClass="form-date"
+                                            maxWidth="Infinity"/>
+
+                                <Label text="QUERY"
+                                       styleClass="field-label"/>
+                                <TextArea fx:id="queryTextField"
+                                          promptText="Describe the query or concern..."
+                                          styleClass="form-field"
+                                          prefHeight="100"
+                                          wrapText="true"/>
+
+                                <Label text="RESPONSE"
+                                       styleClass="field-label"/>
+                                <TextArea fx:id="responseTextField"
+                                          promptText="Enter response here..."
+                                          styleClass="form-field"
+                                          prefHeight="100"
+                                          wrapText="true"/>
+
+                                <Region prefHeight="8"/>
+
+                                <HBox spacing="10">
+                                    <Button text="SAVE QUERY"
+                                            styleClass="btn-primary"
+                                            HBox.hgrow="ALWAYS"
+                                            maxWidth="Infinity"
+                                            onAction="#handleSaveQuery"/>
+                                    <Button text="RESPOND"
+                                            styleClass="btn-secondary"
+                                            HBox.hgrow="ALWAYS"
+                                            maxWidth="Infinity"
+                                            onAction="#handleRespondQuery"/>
+                                </HBox>
+
+                                <Label fx:id="queryFormStatus"
+                                       text=""
+                                       styleClass="success-label"
+                                       wrapText="true"/>
+
+                            </VBox>
+                        </ScrollPane>
+
+                    </SplitPane>
+                </Tab>
+
+            </TabPane>
+        </VBox>
     </center>
+
 </BorderPane>

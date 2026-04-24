@@ -6,8 +6,15 @@ public class ServiceRecord extends VehicleRecord {
 
     private String serviceType;
     private double cost;
+    private String vehicleReg;
 
-    public ServiceRecord() {}
+    public ServiceRecord() {
+
+    }
+
+
+    public String getVehicleReg() { return vehicleReg; }
+    public void setVehicleReg(String r) { this.vehicleReg = r; }
 
     public ServiceRecord(int recordId, int vehicleId, LocalDate date,
                          String serviceType, String description, double cost) {

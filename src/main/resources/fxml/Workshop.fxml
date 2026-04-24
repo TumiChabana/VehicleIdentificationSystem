@@ -1,13 +1,330 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.WorkshopController"
-            style="-fx-background-color: #0d0d1a;">
+            styleClass="root-pane"
+            stylesheets="@../styles/workshop.css">
+
+    <!-- ═══ TOP ═══ -->
+    <top>
+        <VBox>
+            <MenuBar styleClass="menu-bar">
+                <Menu text="File">
+                    <MenuItem text="Refresh"
+                              onAction="#handleRefresh"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Exit"
+                              onAction="#handleExit"/>
+                </Menu>
+                <Menu text="Modules">
+                    <MenuItem text="⬛  Dashboard"
+                              onAction="#goToDashboard"/>
+                    <MenuItem text="👤  Customer"
+                              onAction="#openCustomer"/>
+                    <MenuItem text="🚔  Police"
+                              onAction="#openPolice"/>
+                    <MenuItem text="🛡  Insurance"
+                              onAction="#openInsurance"/>
+                </Menu>
+            </MenuBar>
+
+            <!-- Header -->
+            <HBox styleClass="top-header"
+                  alignment="CENTER_LEFT" spacing="20">
+                <Label text="VIS" styleClass="header-logo"/>
+                <VBox>
+                    <Label text="WORKSHOP MODULE"
+                           styleClass="header-title"/>
+                    <Label text="Vehicle Registration &amp; Service Records"
+                           styleClass="header-sub"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="userLabel"
+                       text=""
+                       styleClass="role-badge"/>
+                <Button text="← Dashboard"
+                        styleClass="btn-secondary"
+                        onAction="#goToDashboard"/>
+                <Button text="Logout"
+                        styleClass="btn-danger"
+                        onAction="#handleLogout"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ═══ CENTER ═══ -->
     <center>
-        <Label text="Workshop Module — Coming Soon"
-               style="-fx-text-fill: white; -fx-font-size: 24px;"/>
+        <VBox styleClass="main-content" spacing="0">
+
+            <TabPane fx:id="workshopTabs"
+                     styleClass="module-tabs"
+                     VBox.vgrow="ALWAYS">
+
+                <!-- ══════════════════════════
+                     TAB 1 — VEHICLES
+                ══════════════════════════ -->
+                <Tab text="🚗  Vehicles" closable="false">
+                    <SplitPane dividerPositions="0.65"
+                               styleClass="split-pane">
+
+                        <!-- LEFT: Vehicle Table -->
+                        <VBox styleClass="panel-card" spacing="14">
+                            <padding>
+                                <Insets top="20" right="20"
+                                        bottom="20" left="20"/>
+                            </padding>
+
+                            <!-- Search + Add row -->
+                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                <TextField fx:id="vehicleSearchField"
+                                           promptText="🔍  Search by registration, make or model..."
+                                           styleClass="form-field"
+                                           HBox.hgrow="ALWAYS"
+                                           onKeyReleased="#handleVehicleSearch"/>
+                                <Button text="+ Add Vehicle"
+                                        styleClass="btn-primary"
+                                        onAction="#handleAddVehicle"/>
+                                <Button text="Clear"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleClearVehicle"/>
+                            </HBox>
+
+                            <!-- Table -->
+                            <TableView fx:id="vehicleTable"
+                                       styleClass="table-view"
+                                       VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colReg"
+                                                 text="Registration"/>
+                                    <TableColumn fx:id="colMake"
+                                                 text="Make"/>
+                                    <TableColumn fx:id="colModel"
+                                                 text="Model"/>
+                                    <TableColumn fx:id="colYear"
+                                                 text="Year"/>
+                                    <TableColumn fx:id="colColor"
+                                                 text="Color"/>
+                                    <TableColumn fx:id="colOwner"
+                                                 text="Owner"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No vehicles found"
+                                           style="-fx-text-fill: #555577;"/>
+                                </placeholder>
+                            </TableView>
+
+                            <!-- Action buttons -->
+                            <HBox spacing="10">
+                                <Button text="✏ Edit Selected"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleEditVehicle"/>
+                                <Button text="🗑 Delete Selected"
+                                        styleClass="btn-danger"
+                                        onAction="#handleDeleteVehicle"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="vehicleStatusLabel"
+                                       text=""
+                                       styleClass="success-label"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- RIGHT: Vehicle Form -->
+                        <ScrollPane styleClass="scroll-pane"
+                                    fitToWidth="true">
+                            <VBox styleClass="panel-card"
+                                  spacing="16">
+                                <padding>
+                                    <Insets top="20" right="24"
+                                            bottom="20" left="24"/>
+                                </padding>
+
+                                <Label fx:id="vehicleFormTitle"
+                                       text="Add New Vehicle"
+                                       styleClass="section-title"/>
+
+                                <Label text="REGISTRATION NUMBER"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="fieldReg"
+                                           promptText="e.g. LSO-009-AA"
+                                           styleClass="form-field"/>
+
+                                <Label text="MAKE" styleClass="field-label"/>
+                                <TextField fx:id="fieldMake"
+                                           promptText="e.g. Toyota"
+                                           styleClass="form-field"/>
+
+                                <Label text="MODEL" styleClass="field-label"/>
+                                <TextField fx:id="fieldModel"
+                                           promptText="e.g. Hilux"
+                                           styleClass="form-field"/>
+
+                                <Label text="YEAR" styleClass="field-label"/>
+                                <TextField fx:id="fieldYear"
+                                           promptText="e.g. 2022"
+                                           styleClass="form-field"/>
+
+                                <Label text="COLOR" styleClass="field-label"/>
+                                <TextField fx:id="fieldColor"
+                                           promptText="e.g. White"
+                                           styleClass="form-field"/>
+
+                                <Label text="OWNER" styleClass="field-label"/>
+                                <ComboBox fx:id="ownerComboBox"
+                                          promptText="Select owner..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Region prefHeight="10"/>
+
+                                <Button fx:id="vehicleSaveBtn"
+                                        text="SAVE VEHICLE"
+                                        styleClass="btn-primary"
+                                        maxWidth="Infinity"
+                                        onAction="#handleSaveVehicle"/>
+
+                                <Label fx:id="vehicleFormStatus"
+                                       text=""
+                                       styleClass="success-label"
+                                       wrapText="true"/>
+
+                            </VBox>
+                        </ScrollPane>
+
+                    </SplitPane>
+                </Tab>
+
+                <!-- ══════════════════════════
+                     TAB 2 — SERVICE RECORDS
+                ══════════════════════════ -->
+                <Tab text="🔧  Service Records" closable="false">
+                    <SplitPane dividerPositions="0.65"
+                               styleClass="split-pane">
+
+                        <!-- LEFT: Service Table -->
+                        <VBox styleClass="panel-card" spacing="14">
+                            <padding>
+                                <Insets top="20" right="20"
+                                        bottom="20" left="20"/>
+                            </padding>
+
+                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                <ComboBox fx:id="serviceVehicleFilter"
+                                          promptText="Filter by vehicle..."
+                                          styleClass="form-combo"
+                                          prefWidth="260"
+                                          onAction="#handleServiceFilter"/>
+                                <Button text="+ Add Record"
+                                        styleClass="btn-primary"
+                                        onAction="#handleAddService"/>
+                                <Button text="Clear"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleClearService"/>
+                            </HBox>
+
+                            <TableView fx:id="serviceTable"
+                                       styleClass="table-view"
+                                       VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colSVehicle"
+                                                 text="Vehicle"/>
+                                    <TableColumn fx:id="colSDate"
+                                                 text="Date"/>
+                                    <TableColumn fx:id="colSType"
+                                                 text="Service Type"/>
+                                    <TableColumn fx:id="colSDesc"
+                                                 text="Description"/>
+                                    <TableColumn fx:id="colSCost"
+                                                 text="Cost (M)"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No service records found"
+                                           style="-fx-text-fill: #555577;"/>
+                                </placeholder>
+                            </TableView>
+
+                            <HBox spacing="10">
+                                <Button text="🗑 Delete Selected"
+                                        styleClass="btn-danger"
+                                        onAction="#handleDeleteService"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="serviceStatusLabel"
+                                       text=""
+                                       styleClass="success-label"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- RIGHT: Service Form -->
+                        <ScrollPane styleClass="scroll-pane"
+                                    fitToWidth="true">
+                            <VBox styleClass="panel-card"
+                                  spacing="16">
+                                <padding>
+                                    <Insets top="20" right="24"
+                                            bottom="20" left="24"/>
+                                </padding>
+
+                                <Label text="Add Service Record"
+                                       styleClass="section-title"/>
+
+                                <Label text="VEHICLE"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="serviceVehicleCombo"
+                                          promptText="Select vehicle..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Label text="SERVICE DATE"
+                                       styleClass="field-label"/>
+                                <DatePicker fx:id="serviceDatePicker"
+                                            styleClass="form-date"
+                                            maxWidth="Infinity"/>
+
+                                <Label text="SERVICE TYPE"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="serviceTypeCombo"
+                                          promptText="Select type..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Label text="DESCRIPTION"
+                                       styleClass="field-label"/>
+                                <TextArea fx:id="serviceDescField"
+                                          promptText="Describe the service..."
+                                          styleClass="form-field"
+                                          prefHeight="100"
+                                          wrapText="true"/>
+
+                                <Label text="COST (M)"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="serviceCostField"
+                                           promptText="e.g. 1500.00"
+                                           styleClass="form-field"/>
+
+                                <Region prefHeight="10"/>
+
+                                <Button text="SAVE RECORD"
+                                        styleClass="btn-primary"
+                                        maxWidth="Infinity"
+                                        onAction="#handleSaveService"/>
+
+                                <Label fx:id="serviceFormStatus"
+                                       text=""
+                                       styleClass="success-label"
+                                       wrapText="true"/>
+
+                            </VBox>
+                        </ScrollPane>
+
+                    </SplitPane>
+                </Tab>
+
+            </TabPane>
+        </VBox>
     </center>
+
 </BorderPane>

@@ -10,7 +10,7 @@ public class Vehicle {
     private String color;
     private int ownerId;
     private String ownerName;
-    public Vehicle() {}
+
 
     public Vehicle(int vehicleId, String registrationNumber, String make,
                    String model, int year, String color, int ownerId) {
@@ -22,6 +22,11 @@ public class Vehicle {
         this.color = color;
         this.ownerId = ownerId;
     }
+
+    public Vehicle() {
+
+    }
+
 
     public int getVehicleId() { return vehicleId; }
     public void setVehicleId(int vehicleId) { this.vehicleId = vehicleId; }
@@ -55,4 +60,6 @@ public class Vehicle {
         return year + " " + make + " " + model
                 + " [" + registrationNumber + "]";
     }
+
+
 }

@@ -39,4 +39,36 @@ public abstract class BaseModuleController {
             System.err.println("Navigation error: " + e.getMessage());
         }
     }
+
+    protected void navigateToModule(String fxmlPath,
+                                    String cssPath,
+                                    Label anyLabel) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource(fxmlPath));
+            Scene scene = new Scene(loader.load());
+
+            java.net.URL base =
+                    getClass().getResource("/styles/base.css");
+            java.net.URL css  =
+                    getClass().getResource(cssPath);
+            if (base != null)
+                scene.getStylesheets().add(base.toExternalForm());
+            if (css != null)
+                scene.getStylesheets().add(css.toExternalForm());
+
+            Object controller = loader.getController();
+            if (controller instanceof BaseModuleController) {
+                ((BaseModuleController) controller)
+                        .initUser(currentUser);
+            }
+
+            Stage stage = (Stage) anyLabel.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setMaximized(true);
+
+        } catch (Exception e) {
+            System.err.println("Navigation error: " + e.getMessage());
+        }
+    }
 }
