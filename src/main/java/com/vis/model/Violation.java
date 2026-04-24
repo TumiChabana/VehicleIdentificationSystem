@@ -10,6 +10,7 @@ public class Violation {
     private String violationType;
     private double fineAmount;
     private String status;
+    private String vehicleReg;
 
     public Violation() {}
 
@@ -40,4 +41,12 @@ public class Violation {
 
     public String getStatus() { return status; }
     public void setStatus(String s) { this.status = s; }
+
+    public void setVehicleReg(String reg) {
+        this.vehicleReg = reg;
+    }
+
+    public String getVehicleReg() {
+        return vehicleReg;
+    }
 }

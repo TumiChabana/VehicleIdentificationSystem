@@ -1,13 +1,333 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.PoliceController"
-            style="-fx-background-color: #0d0d1a;">
+            styleClass="root-pane">
+
+    <!-- ═══ TOP ═══ -->
+    <top>
+        <VBox>
+            <MenuBar styleClass="menu-bar">
+                <Menu text="File">
+                    <MenuItem text="Refresh"
+                              onAction="#handleRefresh"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Exit"
+                              onAction="#handleExit"/>
+                </Menu>
+                <Menu text="Modules">
+                    <MenuItem text="⬛  Dashboard"
+                              onAction="#goToDashboard"/>
+                    <MenuItem text="🔧  Workshop"
+                              onAction="#openWorkshop"/>
+                    <MenuItem text="👤  Customer"
+                              onAction="#openCustomer"/>
+                    <MenuItem text="🛡  Insurance"
+                              onAction="#openInsurance"/>
+                </Menu>
+            </MenuBar>
+
+            <HBox styleClass="top-header"
+                  alignment="CENTER_LEFT" spacing="20">
+                <Label text="VIS" styleClass="header-logo"/>
+                <VBox>
+                    <Label text="POLICE MODULE"
+                           styleClass="header-title"/>
+                    <Label text="Reports &amp; Violations"
+                           styleClass="header-sub"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="userLabel"
+                       text="" styleClass="role-badge"/>
+                <Button text="← Dashboard"
+                        styleClass="btn-secondary"
+                        onAction="#goToDashboard"/>
+                <Button text="Logout"
+                        styleClass="btn-danger"
+                        onAction="#handleLogout"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ═══ CENTER ═══ -->
     <center>
-        <Label text="Police Module - Coming Soon"
-               style="-fx-text-fill: white; -fx-font-size: 24px;"/>
+        <VBox styleClass="main-content">
+            <TabPane fx:id="policeTabs"
+                     styleClass="module-tabs"
+                     VBox.vgrow="ALWAYS">
+
+                <!-- ══════════════════════════
+                     TAB 1 — POLICE REPORTS
+                ══════════════════════════ -->
+                <Tab text="🚔  Police Reports" closable="false">
+                    <SplitPane dividerPositions="0.62"
+                               styleClass="split-pane">
+
+                        <!-- LEFT: Reports Table -->
+                        <VBox styleClass="panel-card" spacing="14">
+                            <padding>
+                                <Insets top="20" right="20"
+                                        bottom="20" left="20"/>
+                            </padding>
+
+                            <HBox spacing="12"
+                                  alignment="CENTER_LEFT">
+                                <ComboBox fx:id="reportTypeFilter"
+                                          promptText="Filter by type..."
+                                          styleClass="form-combo"
+                                          prefWidth="200"
+                                          onAction="#handleReportFilter"/>
+                                <TextField fx:id="reportSearchField"
+                                           promptText="🔍  Search by officer or vehicle..."
+                                           styleClass="form-field"
+                                           HBox.hgrow="ALWAYS"
+                                           onKeyReleased="#handleReportSearch"/>
+                                <Button text="+ Add Report"
+                                        styleClass="btn-primary"
+                                        onAction="#handleAddReport"/>
+                                <Button text="Clear"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleClearReport"/>
+                            </HBox>
+
+                            <TableView fx:id="reportTable"
+                                       styleClass="table-view"
+                                       VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colRVehicle"
+                                                 text="Vehicle"/>
+                                    <TableColumn fx:id="colRDate"
+                                                 text="Date"/>
+                                    <TableColumn fx:id="colRType"
+                                                 text="Type"/>
+                                    <TableColumn fx:id="colROfficer"
+                                                 text="Officer"/>
+                                    <TableColumn fx:id="colRDesc"
+                                                 text="Description"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No reports found"
+                                           style="-fx-text-fill: #555577;"/>
+                                </placeholder>
+                            </TableView>
+
+                            <HBox spacing="10">
+                                <Button text="🗑 Delete Selected"
+                                        styleClass="btn-danger"
+                                        onAction="#handleDeleteReport"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="reportStatusLabel"
+                                       text=""
+                                       styleClass="success-label"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- RIGHT: Report Form -->
+                        <ScrollPane styleClass="scroll-pane"
+                                    fitToWidth="true">
+                            <VBox styleClass="panel-card"
+                                  spacing="16">
+                                <padding>
+                                    <Insets top="20" right="24"
+                                            bottom="20" left="24"/>
+                                </padding>
+
+                                <Label text="File Police Report"
+                                       styleClass="section-title"/>
+
+                                <Label text="VEHICLE"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="reportVehicleCombo"
+                                          promptText="Select vehicle..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Label text="REPORT DATE"
+                                       styleClass="field-label"/>
+                                <DatePicker fx:id="reportDatePicker"
+                                            styleClass="form-date"
+                                            maxWidth="Infinity"/>
+
+                                <Label text="REPORT TYPE"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="reportTypeCombo"
+                                          promptText="Select type..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Label text="OFFICER NAME"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="reportOfficerField"
+                                           promptText="e.g. Officer Molapo"
+                                           styleClass="form-field"/>
+
+                                <Label text="DESCRIPTION"
+                                       styleClass="field-label"/>
+                                <TextArea fx:id="reportDescField"
+                                          promptText="Describe the incident..."
+                                          styleClass="form-field"
+                                          prefHeight="120"
+                                          wrapText="true"/>
+
+                                <Region prefHeight="8"/>
+
+                                <Button text="FILE REPORT"
+                                        styleClass="btn-primary"
+                                        maxWidth="Infinity"
+                                        onAction="#handleSaveReport"/>
+
+                                <Label fx:id="reportFormStatus"
+                                       text=""
+                                       styleClass="success-label"
+                                       wrapText="true"/>
+                            </VBox>
+                        </ScrollPane>
+
+                    </SplitPane>
+                </Tab>
+
+                <!-- ══════════════════════════
+                     TAB 2 — VIOLATIONS
+                ══════════════════════════ -->
+                <Tab text="⚠️  Violations" closable="false">
+                    <SplitPane dividerPositions="0.62"
+                               styleClass="split-pane">
+
+                        <!-- LEFT: Violations Table -->
+                        <VBox styleClass="panel-card" spacing="14">
+                            <padding>
+                                <Insets top="20" right="20"
+                                        bottom="20" left="20"/>
+                            </padding>
+
+                            <HBox spacing="12"
+                                  alignment="CENTER_LEFT">
+                                <ComboBox fx:id="violationStatusFilter"
+                                          promptText="Filter by status..."
+                                          styleClass="form-combo"
+                                          prefWidth="180"
+                                          onAction="#handleViolationFilter"/>
+                                <TextField fx:id="violationSearchField"
+                                           promptText="🔍  Search by type or vehicle..."
+                                           styleClass="form-field"
+                                           HBox.hgrow="ALWAYS"
+                                           onKeyReleased="#handleViolationSearch"/>
+                                <Button text="+ Add Violation"
+                                        styleClass="btn-primary"
+                                        onAction="#handleAddViolation"/>
+                                <Button text="Clear"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleClearViolation"/>
+                            </HBox>
+
+                            <TableView fx:id="violationTable"
+                                       styleClass="table-view"
+                                       VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colVVehicle"
+                                                 text="Vehicle"/>
+                                    <TableColumn fx:id="colVDate"
+                                                 text="Date"/>
+                                    <TableColumn fx:id="colVType"
+                                                 text="Type"/>
+                                    <TableColumn fx:id="colVFine"
+                                                 text="Fine (M)"/>
+                                    <TableColumn fx:id="colVStatus"
+                                                 text="Status"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No violations found"
+                                           style="-fx-text-fill: #555577;"/>
+                                </placeholder>
+                            </TableView>
+
+                            <!-- Mark paid/unpaid buttons -->
+                            <HBox spacing="10">
+                                <Button text="✅ Mark as Paid"
+                                        styleClass="btn-primary"
+                                        onAction="#handleMarkPaid"/>
+                                <Button text="↩ Mark as Unpaid"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleMarkUnpaid"/>
+                                <Button text="🗑 Delete"
+                                        styleClass="btn-danger"
+                                        onAction="#handleDeleteViolation"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="violationStatusLabel"
+                                       text=""
+                                       styleClass="success-label"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- RIGHT: Violation Form -->
+                        <ScrollPane styleClass="scroll-pane"
+                                    fitToWidth="true">
+                            <VBox styleClass="panel-card"
+                                  spacing="16">
+                                <padding>
+                                    <Insets top="20" right="24"
+                                            bottom="20" left="24"/>
+                                </padding>
+
+                                <Label text="Record Violation"
+                                       styleClass="section-title"/>
+
+                                <Label text="VEHICLE"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="violationVehicleCombo"
+                                          promptText="Select vehicle..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Label text="VIOLATION DATE"
+                                       styleClass="field-label"/>
+                                <DatePicker fx:id="violationDatePicker"
+                                            styleClass="form-date"
+                                            maxWidth="Infinity"/>
+
+                                <Label text="VIOLATION TYPE"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="violationTypeCombo"
+                                          promptText="Select type..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Label text="FINE AMOUNT (M)"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="violationFineField"
+                                           promptText="e.g. 500.00"
+                                           styleClass="form-field"/>
+
+                                <Label text="STATUS"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="violationStatusCombo"
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Region prefHeight="8"/>
+
+                                <Button text="SAVE VIOLATION"
+                                        styleClass="btn-primary"
+                                        maxWidth="Infinity"
+                                        onAction="#handleSaveViolation"/>
+
+                                <Label fx:id="violationFormStatus"
+                                       text=""
+                                       styleClass="success-label"
+                                       wrapText="true"/>
+                            </VBox>
+                        </ScrollPane>
+
+                    </SplitPane>
+                </Tab>
+
+            </TabPane>
+        </VBox>
     </center>
+
 </BorderPane>

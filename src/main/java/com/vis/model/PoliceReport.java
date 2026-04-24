@@ -6,6 +6,7 @@ public class PoliceReport extends VehicleRecord {
 
     private String reportType;
     private String officerName;
+    private String vehicleReg;
 
     public PoliceReport() {}
 
@@ -30,4 +31,7 @@ public class PoliceReport extends VehicleRecord {
 
     public String getOfficerName() { return officerName; }
     public void setOfficerName(String o) { this.officerName = o; }
+
+    public String getVehicleReg() { return vehicleReg; }
+    public void setVehicleReg(String r) { this.vehicleReg = r; }
 }

@@ -14,16 +14,22 @@ public class PoliceDAO {
 
     public List<PoliceReport> getAllReports() {
         List<PoliceReport> list = new ArrayList<>();
-        String sql = "SELECT * FROM police_report ORDER BY report_date DESC";
-
+        String sql = """
+        SELECT pr.*, v.registration_number as reg
+        FROM police_report pr
+        JOIN vehicle v ON pr.vehicle_id = v.vehicle_id
+        ORDER BY pr.report_date DESC
+        """;
         try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) list.add(mapReport(rs));
-
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                PoliceReport r = mapReport(rs);
+                r.setVehicleReg(rs.getString("reg"));
+                list.add(r);
+            }
         } catch (SQLException e) {
-            System.err.println("Error fetching reports: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
         return list;
     }
@@ -54,18 +60,50 @@ public class PoliceDAO {
 
     public List<Violation> getAllViolations() {
         List<Violation> list = new ArrayList<>();
-        String sql = "SELECT * FROM violation ORDER BY violation_date DESC";
-
+        String sql = """
+        SELECT vl.*, v.registration_number as reg
+        FROM violation vl
+        JOIN vehicle v ON vl.vehicle_id = v.vehicle_id
+        ORDER BY vl.violation_date DESC
+        """;
         try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) list.add(mapViolation(rs));
-
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Violation v = mapViolation(rs);
+                v.setVehicleReg(rs.getString("reg"));
+                list.add(v);
+            }
         } catch (SQLException e) {
-            System.err.println("Error fetching violations: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
         return list;
+    }
+
+
+
+    public boolean deleteReport(int id) {
+        String sql = "DELETE FROM police_report WHERE report_id=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean deleteViolation(int id) {
+        String sql = "DELETE FROM violation WHERE violation_id=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+            return false;
+        }
     }
 
     public boolean addViolation(Violation v) {
