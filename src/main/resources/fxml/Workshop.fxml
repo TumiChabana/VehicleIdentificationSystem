@@ -4,6 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.*?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.WorkshopController"
@@ -13,7 +15,7 @@
     <!-- ═══ TOP ═══ -->
     <top>
         <VBox>
-            <MenuBar styleClass="menu-bar">
+            <MenuBar fx:id="workshopMenuBar" styleClass="menu-bar">
                 <Menu text="File">
                     <MenuItem text="Refresh"
                               onAction="#handleRefresh"/>
@@ -22,13 +24,11 @@
                               onAction="#handleExit"/>
                 </Menu>
                 <Menu text="Modules">
-                    <MenuItem text="⬛  Dashboard"
-                              onAction="#goToDashboard"/>
-                    <MenuItem text="👤  Customer"
+                    <MenuItem text="Customer"
                               onAction="#openCustomer"/>
-                    <MenuItem text="🚔  Police"
+                    <MenuItem text="Police"
                               onAction="#openPolice"/>
-                    <MenuItem text="🛡  Insurance"
+                    <MenuItem text="Insurance"
                               onAction="#openInsurance"/>
                 </Menu>
             </MenuBar>
@@ -36,18 +36,32 @@
             <!-- Header -->
             <HBox styleClass="top-header"
                   alignment="CENTER_LEFT" spacing="20">
-                <Label text="VIS" styleClass="header-logo"/>
-                <VBox>
-                    <Label text="WORKSHOP MODULE"
-                           styleClass="header-title"/>
-                    <Label text="Vehicle Registration &amp; Service Records"
-                           styleClass="header-sub"/>
-                </VBox>
+                <HBox spacing="9">
+                    <!-- Logo + Title -->
+                    <ImageView fitHeight="40" fitWidth="40"
+                               pickOnBounds="true" preserveRatio="true" >
+                        <image>
+                            <Image url="/images/logo3.png"/>
+                        </image>
+                    </ImageView>
+
+                    <VBox>
+                        <Label fx:id="moduleTitleLabel"
+                               text="WORKSHOP"
+                               styleClass="header-title"/>
+                        <Label fx:id="moduleSubLabel" text="Vehicle Registration &amp; Service Records"
+                               styleClass="header-sub"/>
+                    </VBox>
+
+                </HBox>
+
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="userLabel"
                        text=""
                        styleClass="role-badge"/>
-                <Button text="← Dashboard"
+
+                <Button fx:id="dashboardBtn"
+                        text="Dashboard"
                         styleClass="btn-secondary"
                         onAction="#goToDashboard"/>
                 <Button text="Logout"
@@ -68,7 +82,7 @@
                 <!-- ══════════════════════════
                      TAB 1 — VEHICLES
                 ══════════════════════════ -->
-                <Tab text="🚗  Vehicles" closable="false">
+                <Tab text="Vehicles" closable="false">
                     <SplitPane dividerPositions="0.65"
                                styleClass="split-pane">
 
@@ -82,7 +96,7 @@
                             <!-- Search + Add row -->
                             <HBox spacing="12" alignment="CENTER_LEFT">
                                 <TextField fx:id="vehicleSearchField"
-                                           promptText="🔍  Search by registration, make or model..."
+                                           promptText="Search by registration, make or model..."
                                            styleClass="form-field"
                                            HBox.hgrow="ALWAYS"
                                            onKeyReleased="#handleVehicleSearch"/>
@@ -120,10 +134,10 @@
 
                             <!-- Action buttons -->
                             <HBox spacing="10">
-                                <Button text="✏ Edit Selected"
+                                <Button text="Edit Selected"
                                         styleClass="btn-secondary"
                                         onAction="#handleEditVehicle"/>
-                                <Button text="🗑 Delete Selected"
+                                <Button text="Delete Selected"
                                         styleClass="btn-danger"
                                         onAction="#handleDeleteVehicle"/>
                                 <Region HBox.hgrow="ALWAYS"/>
@@ -179,6 +193,28 @@
                                           styleClass="form-combo"
                                           maxWidth="Infinity"/>
 
+                                <!-- Image Upload Row -->
+                                <HBox spacing="12" alignment="CENTER_LEFT">
+                                    <Label text="Vehicle Image"
+                                           styleClass="form-label"/>
+                                    <TextField fx:id="imagePathField"
+                                               promptText="No image selected"
+                                               styleClass="form-input"
+                                               editable="false"
+                                               HBox.hgrow="ALWAYS"/>
+                                    <Button text="Browse…"
+                                            styleClass="btn-secondary"
+                                            onAction="#handleImageBrowse"/>
+                                </HBox>
+
+                                <!-- Image Preview -->
+                                <ImageView fx:id="imagePreview"
+                                           fitWidth="240"
+                                           fitHeight="140"
+                                           preserveRatio="true"
+                                           styleClass="image-preview"
+                                           visible="false"/>
+
                                 <Region prefHeight="10"/>
 
                                 <Button fx:id="vehicleSaveBtn"
@@ -201,7 +237,7 @@
                 <!-- ══════════════════════════
                      TAB 2 — SERVICE RECORDS
                 ══════════════════════════ -->
-                <Tab text="🔧  Service Records" closable="false">
+                <Tab text="Service Records" closable="false">
                     <SplitPane dividerPositions="0.65"
                                styleClass="split-pane">
 
@@ -248,7 +284,8 @@
                             </TableView>
 
                             <HBox spacing="10">
-                                <Button text="🗑 Delete Selected"
+                                <Button fx:id="deleteVehicleBtn"
+                                        text="Delete Selected"
                                         styleClass="btn-danger"
                                         onAction="#handleDeleteService"/>
                                 <Region HBox.hgrow="ALWAYS"/>

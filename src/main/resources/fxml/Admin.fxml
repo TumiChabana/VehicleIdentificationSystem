@@ -1,13 +1,186 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.AdminController"
-            style="-fx-background-color: #0d0d1a;">
+            styleClass="root-pane"
+            stylesheets="@../styles/dashboard.css">
+
+
+    <!-- ═══ TOP ═══ -->
+    <top>
+        <VBox>
+            <MenuBar styleClass="menu-bar">
+                <Menu text="File">
+                    <MenuItem text="Refresh"
+                              onAction="#handleRefresh"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Exit"
+                              onAction="#handleExit"/>
+                </Menu>
+                <Menu text="Modules">
+                    <MenuItem text="Dashboard"
+                              onAction="#goToDashboard"/>
+                </Menu>
+            </MenuBar>
+
+            <HBox styleClass="top-header"
+                  alignment="CENTER_LEFT" spacing="20">
+                <Label text="VIS" styleClass="header-logo"/>
+                <VBox>
+                    <Label text="ADMIN MODULE"
+                           styleClass="header-title"/>
+                    <Label text="User Access Management"
+                           styleClass="header-sub"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="userLabel"
+                       text="" styleClass="role-badge"/>
+                <Button fx:id="dashboardBtn"
+                        text="← Dashboard"
+                        styleClass="btn-secondary"
+                        onAction="#goToDashboard"/>
+                <Button text="Logout"
+                        styleClass="btn-danger"
+                        onAction="#handleLogout"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ═══ CENTER ═══ -->
     <center>
-        <Label text="Admin Module — Coming Soon"
-               style="-fx-text-fill: white; -fx-font-size: 24px;"/>
+        <SplitPane dividerPositions="0.62"
+                   styleClass="split-pane"
+                   style="-fx-background-color: #0d0d1a;
+                          -fx-padding: 20;">
+
+            <!-- LEFT: Users Table -->
+            <VBox styleClass="panel-card" spacing="14">
+                <padding>
+                    <Insets top="20" right="20"
+                            bottom="20" left="20"/>
+                </padding>
+
+                <Label text="System Users"
+                       styleClass="section-title"/>
+                <Label text="All accounts with system access"
+                       styleClass="page-subtitle"/>
+
+                <TableView fx:id="userTable"
+                           styleClass="table-view"
+                           VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colUsername"
+                                     text="Username"/>
+                        <TableColumn fx:id="colRole"
+                                     text="Role"/>
+                        <TableColumn fx:id="colCreated"
+                                     text="Created"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="No users found"
+                               style="-fx-text-fill: #555577;"/>
+                    </placeholder>
+                </TableView>
+
+                <HBox spacing="10">
+                    <Button text="🗑 Delete Selected"
+                            styleClass="btn-danger"
+                            onAction="#handleDeleteUser"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="↻ Refresh"
+                            styleClass="btn-secondary"
+                            onAction="#handleRefresh"/>
+                </HBox>
+            </VBox>
+
+            <!-- RIGHT: Create User Form -->
+            <ScrollPane styleClass="scroll-pane"
+                        fitToWidth="true">
+                <VBox styleClass="panel-card" spacing="16">
+                    <padding>
+                        <Insets top="20" right="24"
+                                bottom="20" left="24"/>
+                    </padding>
+
+                    <Label text="Create New User"
+                           styleClass="section-title"/>
+                    <Label text="Provide credentials to a person or organization"
+                           styleClass="page-subtitle"
+                           wrapText="true"/>
+
+                    <Region prefHeight="10"/>
+
+                    <Label text="USERNAME"
+                           styleClass="field-label"/>
+                    <TextField fx:id="fieldUsername"
+                               promptText="e.g. officer2"
+                               styleClass="form-field"/>
+
+                    <Label text="PASSWORD"
+                           styleClass="field-label"/>
+                    <PasswordField fx:id="fieldPassword"
+                                   promptText="Enter password"
+                                   styleClass="form-field"/>
+
+                    <Label text="ROLE" styleClass="field-label"/>
+                    <ComboBox fx:id="roleCombo"
+                              promptText="Select role..."
+                              styleClass="form-combo"
+                              maxWidth="Infinity"
+                              onAction="#handleRoleChange"/>
+                    <!-- Add this below the roleCombo in Admin.fxml -->
+                    <Label fx:id="customerLinkLabel"
+                           text="LINK TO CUSTOMER RECORD"
+                           styleClass="field-label"
+                           visible="false" managed="false"/>
+                    <ComboBox fx:id="customerLinkCombo"
+                              promptText="Select customer to link..."
+                              styleClass="form-combo"
+                              maxWidth="Infinity"
+                              visible="false" managed="false"/>
+
+                    <!-- Role descriptions -->
+                    <VBox styleClass="role-info-card"
+                          spacing="8">
+                        <Label text="ROLE DESCRIPTIONS"
+                               styleClass="field-label"/>
+                        <Label text="ADMIN — Full system access"
+                               styleClass="role-desc"/>
+                        <Label text="WORKSHOP — Vehicle registration and service"
+                               styleClass="role-desc"
+                               wrapText="true"/>
+                        <Label text="CUSTOMER — Own vehicle queries only"
+                               styleClass="role-desc"
+                               wrapText="true"/>
+                        <Label text="POLICE — Reports and violations"
+                               styleClass="role-desc"
+                               wrapText="true"/>
+                        <Label text="INSURANCE — Policy management"
+                               styleClass="role-desc"
+                               wrapText="true"/>
+                    </VBox>
+
+                    <Region prefHeight="10"/>
+
+                    <Button text="CREATE USER ACCOUNT"
+                            styleClass="btn-primary"
+                            maxWidth="Infinity"
+                            onAction="#handleAddUser"/>
+
+                    <Label fx:id="formStatus"
+                           text=""
+                           styleClass="success-label"
+                           wrapText="true"/>
+
+                </VBox>
+            </ScrollPane>
+
+        </SplitPane>
     </center>
+
 </BorderPane>

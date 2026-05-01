@@ -346,6 +346,55 @@ UPDATE users SET password_hash = 'po01ic3' WHERE username = 'officer1';
 UPDATE users SET password_hash = 'w0rk5H0p' WHERE username = 'workshop1';
 UPDATE users SET password_hash = '1nsUr3' WHERE username = 'insurer1';
 
+
+INSERT INTO users (username, password_hash, role)
+VALUES (
+    'customer1',
+    'custom3r',
+    'CUSTOMER'
+) ON CONFLICT (username) DO NOTHING;
+
+ALTER TABLE vehicle ADD COLUMN image_path VARCHAR(512);
+
+-- Add customer link to users
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS customer_id 
+INTEGER REFERENCES customer(customer_id) ON DELETE SET NULL;
+
+-- Add user ownership to police reports
+ALTER TABLE police_report 
+ADD COLUMN IF NOT EXISTS created_by_user_id 
+INTEGER REFERENCES users(user_id) ON DELETE SET NULL;
+
+ALTER TABLE violation 
+ADD COLUMN IF NOT EXISTS created_by_user_id 
+INTEGER REFERENCES users(user_id) ON DELETE SET NULL;
+
+-- Add provider/workshop identifier to users
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS identifier 
+VARCHAR(100);
+
+-- Link existing customers to users
+-- customer1 → Litumeleng Mokoena (customer_id = 1)
+UPDATE users SET customer_id = 1 
+WHERE username = 'customer1';
+
+-- Link officers to their reports
+-- officer1's reports (update existing reports)
+UPDATE police_report 
+SET created_by_user_id = (
+    SELECT user_id FROM users WHERE username = 'officer1'
+)
+WHERE officer_name = 'Officer Molapo';
+
+UPDATE users SET identifier = 'Workshop 1' 
+WHERE username = 'workshop1';
+
+UPDATE users SET identifier = 
+    'Alliance Insurance' 
+WHERE username = 'insurer1';
+
 COMMIT;]]></console>
     </connection>
   </component>
@@ -369,6 +418,9 @@ COMMIT;]]></console>
   <component name="DBNavigator.Project.ObjectQuickFilterManager">
     <last-used-operator value="EQUAL" />
     <filters />
+  </component>
+  <component name="DBNavigator.Project.ParserDiagnosticsManager">
+    <diagnostics-history />
   </component>
   <component name="DBNavigator.Project.ScriptExecutionManager" clear-outputs="true">
     <recently-used-interfaces />

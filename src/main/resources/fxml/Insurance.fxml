@@ -1,13 +1,359 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.InsuranceController"
-            style="-fx-background-color: #0d0d1a;">
+            styleClass="root-pane">
+
+    <!-- ═══ TOP ═══ -->
+    <top>
+        <VBox>
+            <MenuBar fx:id="insuranceMenuBar" styleClass="menu-bar">
+                <Menu text="File">
+                    <MenuItem text="Refresh"
+                              onAction="#handleRefresh"/>
+                    <SeparatorMenuItem/>
+                    <MenuItem text="Exit"
+                              onAction="#handleExit"/>
+                </Menu>
+                <Menu text="Modules">
+                    <MenuItem text="Workshop"
+                              onAction="#openWorkshop"/>
+                    <MenuItem text="Customer"
+                              onAction="#openCustomer"/>
+                    <MenuItem text="Police"
+                              onAction="#openPolice"/>
+                </Menu>
+            </MenuBar>
+
+            <HBox styleClass="top-header"
+                  alignment="CENTER_LEFT" spacing="20">
+                <HBox spacing="9">
+                    <!-- Logo + Title -->
+                    <ImageView fitHeight="40" fitWidth="40"
+                               pickOnBounds="true" preserveRatio="true" >
+                        <image>
+                            <Image url="/images/logo3.png"/>
+                        </image>
+                    </ImageView>
+
+                    <VBox>
+                        <Label fx:id="moduleTitleLabel"
+                               text="INSURANCE"
+                               styleClass="header-title"/>
+                        <Label fx:id="moduleSubLabel"
+                               text="Policy Management &amp; Coverage Tracking"
+                               styleClass="header-sub"/>
+                    </VBox>
+
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="userLabel"
+                       text="" styleClass="role-badge"/>
+
+                <Button fx:id="dashboardBtn"
+                        text="Dashboard"
+                        styleClass="btn-secondary"
+                        onAction="#goToDashboard"/>
+                <Button text="Logout"
+                        styleClass="btn-danger"
+                        onAction="#handleLogout"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ═══ CENTER ═══ -->
     <center>
-        <Label text="Insurance Module — Coming Soon"
-               style="-fx-text-fill: white; -fx-font-size: 24px;"/>
+        <VBox styleClass="main-content">
+            <TabPane fx:id="insuranceTabs"
+                     styleClass="module-tabs"
+                     VBox.vgrow="ALWAYS">
+
+                <!-- ══════════════════════════
+                     TAB 1 — POLICIES
+                ══════════════════════════ -->
+                <Tab text="Policies" closable="false">
+                    <SplitPane dividerPositions="0.62"
+                               styleClass="split-pane">
+
+                        <!-- LEFT: Policies Table -->
+                        <VBox styleClass="panel-card" spacing="14">
+                            <padding>
+                                <Insets top="20" right="20"
+                                        bottom="20" left="20"/>
+                            </padding>
+
+                            <HBox spacing="12"
+                                  alignment="CENTER_LEFT">
+                                <ComboBox fx:id="policyStatusFilter"
+                                          promptText="Filter by status..."
+                                          styleClass="form-combo"
+                                          prefWidth="180"
+                                          onAction="#handleStatusFilter"/>
+                                <TextField fx:id="policySearchField"
+                                           promptText="Search by policy, provider or vehicle..."
+                                           styleClass="form-field"
+                                           HBox.hgrow="ALWAYS"
+                                           onKeyReleased="#handlePolicySearch"/>
+                                <Button text="Add Policy"
+                                        styleClass="btn-primary"
+                                        onAction="#handleAddPolicy"/>
+                                <Button text="Clear"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleClearPolicy"/>
+                            </HBox>
+
+                            <TableView fx:id="policyTable"
+                                       styleClass="table-view"
+                                       VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colIVehicle"
+                                                 text="Vehicle"/>
+                                    <TableColumn fx:id="colIProvider"
+                                                 text="Provider"/>
+                                    <TableColumn fx:id="colIPolicy"
+                                                 text="Policy No."/>
+                                    <TableColumn fx:id="colIStart"
+                                                 text="Start"/>
+                                    <TableColumn fx:id="colIEnd"
+                                                 text="Expiry"/>
+                                    <TableColumn fx:id="colIPremium"
+                                                 text="Premium (M)"/>
+                                    <TableColumn fx:id="colIStatus"
+                                                 text="Status"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="No policies found"
+                                           style="-fx-text-fill: #555577;"/>
+                                </placeholder>
+                            </TableView>
+
+                            <HBox spacing="10">
+                                <Button text="Mark Active"
+                                        styleClass="btn-primary"
+                                        onAction="#handleMarkActive"/>
+                                <Button text="Mark Expired"
+                                        styleClass="btn-secondary"
+                                        onAction="#handleMarkExpired"/>
+                                <Button text="Cancel Policy"
+                                        styleClass="btn-danger"
+                                        onAction="#handleCancelPolicy"/>
+                                <Button fx:id="deletePolicyBtn"
+                                        text="Delete"
+                                        styleClass="btn-danger"
+                                        onAction="#handleDeletePolicy"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="policyStatusLabel"
+                                       text=""
+                                       styleClass="success-label"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- RIGHT: Policy Form -->
+                        <ScrollPane styleClass="scroll-pane"
+                                    fitToWidth="true">
+                            <VBox styleClass="panel-card"
+                                  spacing="16">
+                                <padding>
+                                    <Insets top="20" right="24"
+                                            bottom="20" left="24"/>
+                                </padding>
+
+                                <Label text="Add Insurance Policy"
+                                       styleClass="section-title"/>
+
+                                <Label text="VEHICLE"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="policyVehicleCombo"
+                                          promptText="Select vehicle..."
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Label text="INSURANCE PROVIDER"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="fieldProvider"
+                                           promptText="e.g. Alliance Insurance"
+                                           styleClass="form-field"/>
+
+                                <Label text="POLICY NUMBER"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="fieldPolicyNumber"
+                                           promptText="e.g. LNI-2025-001"
+                                           styleClass="form-field"/>
+
+                                <Label text="START DATE"
+                                       styleClass="field-label"/>
+                                <DatePicker fx:id="startDatePicker"
+                                            styleClass="form-date"
+                                            maxWidth="Infinity"/>
+
+                                <Label text="END DATE"
+                                       styleClass="field-label"/>
+                                <DatePicker fx:id="endDatePicker"
+                                            styleClass="form-date"
+                                            maxWidth="Infinity"/>
+
+                                <Label text="PREMIUM AMOUNT (M)"
+                                       styleClass="field-label"/>
+                                <TextField fx:id="fieldPremium"
+                                           promptText="e.g. 3500.00"
+                                           styleClass="form-field"/>
+
+                                <Label text="STATUS"
+                                       styleClass="field-label"/>
+                                <ComboBox fx:id="policyStatusCombo"
+                                          styleClass="form-combo"
+                                          maxWidth="Infinity"/>
+
+                                <Region prefHeight="8"/>
+
+                                <Button text="SAVE POLICY"
+                                        styleClass="btn-primary"
+                                        maxWidth="Infinity"
+                                        onAction="#handleSavePolicy"/>
+
+                                <Label fx:id="policyFormStatus"
+                                       text=""
+                                       styleClass="success-label"
+                                       wrapText="true"/>
+                            </VBox>
+                        </ScrollPane>
+
+                    </SplitPane>
+                </Tab>
+
+                <!-- ══════════════════════════
+                     TAB 2 — OVERVIEW
+                ══════════════════════════ -->
+                <Tab text="Overview" closable="false">
+                    <ScrollPane styleClass="scroll-pane"
+                                fitToWidth="true">
+                        <VBox spacing="24" styleClass="main-content">
+                            <padding>
+                                <Insets top="28" right="32"
+                                        bottom="28" left="32"/>
+                            </padding>
+
+                            <Label text="Insurance Overview"
+                                   styleClass="page-title"/>
+                            <Label text="Summary of all insurance policies"
+                                   styleClass="page-subtitle"/>
+
+                            <!-- Summary cards -->
+                            <HBox spacing="16">
+                                <VBox styleClass="stat-card"
+                                      HBox.hgrow="ALWAYS"
+                                      spacing="8">
+                                    <Label text="ACTIVE POLICIES"
+                                           styleClass="stat-label"/>
+                                    <Label fx:id="activeCount"
+                                           text="0"
+                                           styleClass="stat-number"/>
+                                    <ProgressBar
+                                            fx:id="activeProgressBar"
+                                            progress="0"
+                                            maxWidth="Infinity"
+                                            styleClass="progress-bar"/>
+                                </VBox>
+                                <VBox styleClass="stat-card"
+                                      HBox.hgrow="ALWAYS"
+                                      spacing="8">
+                                    <Label text="EXPIRED POLICIES"
+                                           styleClass="stat-label"/>
+                                    <Label fx:id="expiredCount"
+                                           text="0"
+                                           style="-fx-text-fill: #ffaa00;
+                                                  -fx-font-size: 42px;
+                                                  -fx-font-weight: bold;"/>
+                                    <ProgressBar
+                                            fx:id="expiredProgressBar"
+                                            progress="0"
+                                            maxWidth="Infinity"
+                                            styleClass="progress-bar"/>
+                                </VBox>
+                                <VBox styleClass="stat-card"
+                                      HBox.hgrow="ALWAYS"
+                                      spacing="8">
+                                    <Label text="CANCELLED POLICIES"
+                                           styleClass="stat-label"/>
+                                    <Label fx:id="cancelledCount"
+                                           text="0"
+                                           style="-fx-text-fill: #e63946;
+                                                  -fx-font-size: 42px;
+                                                  -fx-font-weight: bold;"/>
+                                    <ProgressBar
+                                            fx:id="cancelledProgressBar"
+                                            progress="0"
+                                            maxWidth="Infinity"
+                                            styleClass="progress-bar"/>
+                                </VBox>
+                                <VBox styleClass="stat-card"
+                                      HBox.hgrow="ALWAYS"
+                                      spacing="8">
+                                    <Label text="TOTAL PREMIUM (M)"
+                                           styleClass="stat-label"/>
+                                    <Label fx:id="totalPremium"
+                                           text="0"
+                                           styleClass="stat-number"/>
+                                    <Label text="Annual revenue"
+                                           styleClass="stat-label"/>
+                                </VBox>
+                            </HBox>
+
+                            <!-- Expiring soon -->
+                            <VBox styleClass="stat-card"
+                                  spacing="14">
+                                <Label text="Expiring Within 30 Days"
+                                       styleClass="section-title"/>
+                                <TableView fx:id="expiringTable"
+                                           styleClass="table-view"
+                                           prefHeight="240"
+                                           >
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
+                                    <columns>
+                                        <TableColumn
+                                                fx:id="colExVehicle"
+                                                text="Vehicle"
+                                                prefWidth="160"/>
+                                        <TableColumn
+                                                fx:id="colExProvider"
+                                                text="Provider"
+                                                prefWidth="200"/>
+                                        <TableColumn
+                                                fx:id="colExPolicy"
+                                                text="Policy No."
+                                                prefWidth="160"/>
+                                        <TableColumn
+                                                fx:id="colExEnd"
+                                                text="Expires"
+                                                prefWidth="120"/>
+                                        <TableColumn
+                                                fx:id="colExDays"
+                                                text="Days Left"
+                                                prefWidth="100"/>
+                                    </columns>
+                                    <placeholder>
+                                        <Label text="No policies expiring soon"
+                                               style="-fx-text-fill: #44cc88;"/>
+                                    </placeholder>
+                                </TableView>
+                            </VBox>
+
+                        </VBox>
+                    </ScrollPane>
+                </Tab>
+
+            </TabPane>
+        </VBox>
     </center>
+
 </BorderPane>

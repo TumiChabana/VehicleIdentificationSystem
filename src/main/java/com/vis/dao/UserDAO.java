@@ -5,6 +5,8 @@ import com.vis.util.DBConnection;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAO {
 
@@ -18,52 +20,138 @@ public class UserDAO {
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
 
-            /*if (rs.next()) {
+            if (rs.next()) {
                 String hash = rs.getString("password_hash");
-                // BCrypt verifies password against stored hash
-                if (BCrypt.checkpw(password, hash)) {
-                    return new User(
+
+                // Try BCrypt first, fall back to plain text
+                boolean passwordMatches;
+                try {
+                    passwordMatches = BCrypt.checkpw(password, hash);
+                } catch (Exception e) {
+                    // Plain text fallback for development
+                    passwordMatches = password.equals(hash);
+                }
+
+                if (passwordMatches) {
+                    User user = new User(
                             rs.getInt("user_id"),
                             rs.getString("username"),
                             hash,
                             rs.getString("role")
                     );
-                }
-            } */
 
-            // Simplified for development
-            if (rs.next()) {
-                String storedPassword = rs.getString("password_hash"); // This will just be plain text now
-                if (password.equals(storedPassword)) {
-                    return new User(rs.getInt("user_id"), rs.getString("username"), storedPassword, rs.getString("role"));
+                    // Load new fields safely
+                    // (handles if columns don't exist yet)
+                    try {
+                        user.setCustomerId(
+                                rs.getInt("customer_id"));
+                        user.setIdentifier(
+                                rs.getString("identifier"));
+                    } catch (SQLException ex) {
+                        System.err.println(
+                                "⚠ New columns not yet in DB: "
+                                        + ex.getMessage());
+                    }
+
+                    return user; // ← only ONE return here
                 }
             }
 
         } catch (SQLException e) {
             System.err.println("Login error: " + e.getMessage());
         }
-        return null; // null means login failed
+        return null;
     }
 
     // REGISTER new user
-    public boolean register(String username, String password, String role) {
-        String sql = "INSERT INTO users (username, password_hash, role) " +
+    public static boolean register(String username,
+                                   String password,
+                                   String role) {
+        String sql = "INSERT INTO users " +
+                "(username, password_hash, role) " +
                 "VALUES (?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            /*Hash the password before storing — never store plain text
-            String hash = BCrypt.hashpw(password, BCrypt.gensalt(10));
-            ps.setString(2, hash);
-            */
+            // Hash password properly
+            String hash = BCrypt.hashpw(
+                    password, BCrypt.gensalt(10));
+
             ps.setString(1, username);
-            ps.setString(2, password);
+            ps.setString(2, hash);
             ps.setString(3, role);
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            System.err.println("Register error: " + e.getMessage());
+            System.err.println("Register error: "
+                    + e.getMessage());
+            return false;
+        }
+    }
+
+    public List<User> getAllUsers() {
+        List<User> list = new ArrayList<>();
+        String sql = "SELECT * FROM users " +
+                "ORDER BY role, username";
+
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                User user = new User(
+                        rs.getInt("user_id"),
+                        rs.getString("username"),
+                        rs.getString("password_hash"),
+                        rs.getString("role")
+                );
+                // Load extra fields if they exist
+                try {
+                    user.setCustomerId(
+                            rs.getInt("customer_id"));
+                    user.setIdentifier(
+                            rs.getString("identifier"));
+                } catch (SQLException ex) {
+                    // Columns not yet added — safe to ignore
+                }
+                list.add(user);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching users: "
+                    + e.getMessage());
+        }
+        return list;
+    }
+
+    public boolean deleteUser(int userId) {
+        String sql = "DELETE FROM users WHERE user_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error deleting user: "
+                    + e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean linkCustomer(String username,
+                                       int customerId) {
+        String sql = "UPDATE users SET customer_id = ? " +
+                "WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ps.setString(2, username);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Link error: " + e.getMessage());
             return false;
         }
     }

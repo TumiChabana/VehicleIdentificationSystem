@@ -28,8 +28,16 @@
             <VBox styleClass="left-panel" alignment="TOP_LEFT">
 
                 <VBox styleClass="logo-area" alignment="TOP_LEFT">
-                    <Label text="VIS" styleClass="logo-text"/>
-                    <Label text="VEHICLE IDENTIFICATION SYSTEM" styleClass="logo-sub"/>
+                    <HBox spacing="12">
+                    <ImageView fitHeight="60" fitWidth="60"
+                               pickOnBounds="true" preserveRatio="true" >
+                        <image>
+                            <Image url="/images/logo3.png"/>
+                        </image>
+                    </ImageView>
+                    <Label text="NVis" styleClass="logo-text"/>
+                    </HBox>
+                    <Label text="National Identification System" styleClass="logo-sub"/>
                 </VBox>
 
                 <VBox alignment="CENTER_LEFT" VBox.vgrow="ALWAYS" styleClass="tagline-area">
@@ -90,10 +98,18 @@
 
                     <Region prefHeight="30"/>
 
-                    <HBox alignment="CENTER" spacing="5">
+                    <HBox alignment="CENTER" spacing="10">
                         <Label text="Don't have an account?" styleClass="note-text"/>
                         <Label text="Contact your administrator" styleClass="note-highlight"/>
                     </HBox>
+
+                    <HBox alignment="CENTER" spacing="10">
+                        <Button text="Home"
+                                styleClass="nav-link"
+                                onAction="#goToLanding"/>
+                    </HBox>
+
+
 
                 </VBox>
 

@@ -39,7 +39,7 @@
                     </image>
                 </ImageView>
 
-                <VBox>
+                <VBox VBox.vgrow="ALWAYS">
                     <Label text="NVis"
                            styleClass="nav-logo-sub"/>
 
@@ -111,7 +111,7 @@
             <VBox styleClass="module-card" HBox.hgrow="ALWAYS"
                   spacing="10">
                 <Label text="01" styleClass="module-number"/>
-                <Label text="🔧" styleClass="module-icon"/>
+                <Label text="~" styleClass="module-icon"/>
                 <Label text="Workshop" styleClass="module-title"/>
                 <Label text="Vehicle registration and full service history tracking"
                        styleClass="module-desc" wrapText="true"/>
@@ -132,7 +132,7 @@
             <VBox styleClass="module-card" HBox.hgrow="ALWAYS"
                   spacing="10">
                 <Label text="02" styleClass="module-number"/>
-                <Label text="👤" styleClass="module-icon"/>
+                <Label text="~" styleClass="module-icon"/>
                 <Label text="Customer" styleClass="module-title"/>
                 <Label text="Owner information, vehicle queries and condition reports"
                        styleClass="module-desc" wrapText="true"/>
@@ -150,7 +150,7 @@
             <VBox styleClass="module-card" HBox.hgrow="ALWAYS"
                   spacing="10">
                 <Label text="03" styleClass="module-number"/>
-                <Label text="🚔" styleClass="module-icon"/>
+                <Label text="~" styleClass="module-icon"/>
                 <Label text="Police" styleClass="module-title"/>
                 <Label text="Violations, theft reports and law enforcement records"
                        styleClass="module-desc" wrapText="true"/>
@@ -168,7 +168,7 @@
             <VBox styleClass="module-card" HBox.hgrow="ALWAYS"
                   spacing="10">
                 <Label text="04" styleClass="module-number"/>
-                <Label text="🛡" styleClass="module-icon"/>
+                <Label text="~" styleClass="module-icon"/>
                 <Label text="Insurance" styleClass="module-title"/>
                 <Label text="Policy management, premium tracking and status"
                        styleClass="module-desc" wrapText="true"/>

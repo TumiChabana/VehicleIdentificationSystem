@@ -166,4 +166,80 @@ public class PoliceDAO {
                 rs.getString("status")
         );
     }
+
+    // Get reports filed by a specific user
+    public List<PoliceReport> getReportsByUserId(int userId) {
+        List<PoliceReport> list = new ArrayList<>();
+        String sql = """
+        SELECT pr.*, v.registration_number as reg
+        FROM police_report pr
+        JOIN vehicle v ON pr.vehicle_id = v.vehicle_id
+        WHERE pr.created_by_user_id = ?
+        ORDER BY pr.report_date DESC
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                PoliceReport r = mapReport(rs);
+                r.setVehicleReg(rs.getString("reg"));
+                list.add(r);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+        return list;
+    }
+
+    // Get violations recorded by a specific user
+    public List<Violation> getViolationsByUserId(int userId) {
+        List<Violation> list = new ArrayList<>();
+        String sql = """
+        SELECT vl.*, v.registration_number as reg
+        FROM violation vl
+        JOIN vehicle v ON vl.vehicle_id = v.vehicle_id
+        WHERE vl.created_by_user_id = ?
+        ORDER BY vl.violation_date DESC
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Violation v = mapViolation(rs);
+                v.setVehicleReg(rs.getString("reg"));
+                list.add(v);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+        return list;
+    }
+
+    // Get reports for vehicles owned by a customer
+    public List<PoliceReport> getReportsByCustomerId(
+            int customerId) {
+        List<PoliceReport> list = new ArrayList<>();
+        String sql = """
+        SELECT pr.*, v.registration_number as reg
+        FROM police_report pr
+        JOIN vehicle v ON pr.vehicle_id = v.vehicle_id
+        WHERE v.owner_id = ?
+        ORDER BY pr.report_date DESC
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                PoliceReport r = mapReport(rs);
+                r.setVehicleReg(rs.getString("reg"));
+                list.add(r);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+        return list;
+    }
 }

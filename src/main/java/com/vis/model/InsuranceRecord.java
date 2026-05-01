@@ -9,6 +9,7 @@ public class InsuranceRecord extends VehicleRecord {
     private LocalDate endDate;
     private double premiumAmount;
     private String status;
+    private String vehicleReg;
 
     public InsuranceRecord() {}
 
@@ -23,6 +24,11 @@ public class InsuranceRecord extends VehicleRecord {
         this.premiumAmount = premiumAmount;
         this.status = status;
     }
+
+    public String getVehicleReg() { return vehicleReg; }
+    public void setVehicleReg(String r) { this.vehicleReg = r; }
+
+    public int getInsuranceId() { return recordId; }
 
     @Override
     public String getRecordType() { return "Insurance Record"; }

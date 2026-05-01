@@ -1,27 +1,26 @@
 package com.vis.controller;
 
-import com.vis.dao.CustomerDAO;
-import com.vis.dao.CustomerQueryDAO;
-import com.vis.dao.VehicleDAO;
-import com.vis.model.Customer;
-import com.vis.model.CustomerQuery;
-import com.vis.model.Vehicle;
+import com.vis.dao.*;
+import com.vis.model.*;
 import com.vis.util.DBConnection;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -29,31 +28,52 @@ import java.util.stream.Collectors;
 public class CustomerController
         extends BaseModuleController implements Initializable {
 
-    // ── CUSTOMER TAB ─────────────────────────────
-    @FXML private TextField customerSearchField;
-    @FXML private TableView<Customer> customerTable;
-    @FXML private TableColumn<Customer, String> colName;
-    @FXML private TableColumn<Customer, String> colPhone;
-    @FXML private TableColumn<Customer, String> colEmail;
-    @FXML private TableColumn<Customer, String> colAddress;
-    @FXML private Label customerStatusLabel;
-    @FXML private Label customerFormTitle;
-    @FXML private Label customerFormStatus;
+    // ── TOP BAR ──────────────────────────────────
+    @FXML private Label moduleTitleLabel;
+    @FXML private Label moduleSubLabel;
     @FXML private Label userLabel;
+    @FXML private Button dashboardBtn;
 
+    // ── TAB 1 — CUSTOMER/PROFILE ──────────────────
+    @FXML private Tab tab1;
+    @FXML private HBox adminSearchBar;
+    @FXML private HBox adminCustomerActions;
+    @FXML private VBox adminCustomerForm;
+    @FXML private VBox customerProfileCard;
+    @FXML private VBox myVehiclesPanel;
+    @FXML private VBox myVehiclesList;
+
+    // Profile labels
+    @FXML private Label profileName;
+    @FXML private Label profilePhone;
+    @FXML private Label profileEmail;
+    @FXML private Label profileAddress;
+
+    // Admin form fields
+    @FXML private TextField customerSearchField;
     @FXML private TextField fieldName;
     @FXML private TextField fieldPhone;
     @FXML private TextField fieldEmail;
     @FXML private TextArea fieldAddress;
     @FXML private Button customerSaveBtn;
+    @FXML private Label customerFormTitle;
+    @FXML private Label customerFormStatus;
+    @FXML private Label customerStatusLabel;
 
-    // ── QUERY TAB ────────────────────────────────
+    @FXML private TableView<Customer> customerTable;
+    @FXML private TableColumn<Customer, String> colName;
+    @FXML private TableColumn<Customer, String> colPhone;
+    @FXML private TableColumn<Customer, String> colEmail;
+    @FXML private TableColumn<Customer, String> colAddress;
+
+    // ── TAB 2 — QUERIES ──────────────────────────
     @FXML private ComboBox<Customer> queryCustomerFilter;
     @FXML private ComboBox<Customer> queryCustomerCombo;
     @FXML private ComboBox<Vehicle> queryVehicleCombo;
     @FXML private DatePicker queryDatePicker;
     @FXML private TextArea queryTextField;
     @FXML private TextArea responseTextField;
+    @FXML private VBox responseArea;
     @FXML private TableView<CustomerQuery> queryTable;
     @FXML private TableColumn<CustomerQuery, String> colQCustomer;
     @FXML private TableColumn<CustomerQuery, String> colQVehicle;
@@ -64,32 +84,148 @@ public class CustomerController
     @FXML private Label queryStatusLabel;
     @FXML private Label queryFormStatus;
     @FXML private Label queryFormTitle;
+    @FXML private Button saveQueryBtn;
+    @FXML private Button respondBtn;
+    @FXML private Button deleteQueryBtn;
+
+    // ── TAB 3 — MY SERVICES (Customer only) ──────
+    @FXML private Tab myServicesTab;
+    @FXML private TableView<ServiceRecord> myServicesTable;
+    @FXML private TableColumn<ServiceRecord, String> colSVehicle;
+    @FXML private TableColumn<ServiceRecord, String> colSDate;
+    @FXML private TableColumn<ServiceRecord, String> colSType;
+    @FXML private TableColumn<ServiceRecord, String> colSDesc;
+    @FXML private TableColumn<ServiceRecord, String> colSCost;
+
+    // ── TAB 4 — MY INSURANCE (Customer only) ─────
+    @FXML private Tab myInsuranceTab;
+    @FXML private TableView<InsuranceRecord> myInsuranceTable;
+    @FXML private TableColumn<InsuranceRecord, String> colIVehicle;
+    @FXML private TableColumn<InsuranceRecord, String> colIProvider;
+    @FXML private TableColumn<InsuranceRecord, String> colIPolicy;
+    @FXML private TableColumn<InsuranceRecord, String> colIStart;
+    @FXML private TableColumn<InsuranceRecord, String> colIEnd;
+    @FXML private TableColumn<InsuranceRecord, String> colIStatus;
+
+    @FXML private MenuBar customerMenuBar;
+    @FXML private SplitPane customerSplitPane;
 
     // ── DAOs ─────────────────────────────────────
-    private final CustomerDAO customerDAO         =
+    private final CustomerDAO customerDAO       =
             new CustomerDAO();
-    private final CustomerQueryDAO queryDAO       =
+    private final CustomerQueryDAO queryDAO     =
             new CustomerQueryDAO();
-    private final VehicleDAO vehicleDAO           =
+    private final VehicleDAO vehicleDAO         =
             new VehicleDAO();
+    private final ServiceRecordDAO serviceDAO   =
+            new ServiceRecordDAO();
+    private final InsuranceDAO insuranceDAO     =
+            new InsuranceDAO();
 
     private List<Customer> allCustomers;
     private List<CustomerQuery> allQueries;
     private boolean isEditMode = false;
     private Customer selectedCustomer = null;
-
     private static final int QUERIES_PER_PAGE = 8;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupCustomerTableColumns();
         setupQueryTableColumns();
+        setupServiceTableColumns();
+        setupInsuranceTableColumns();
     }
 
     @Override
     protected void onUserLoaded() {
         userLabel.setText(currentUser.getRole());
+        setupForRole();
         loadAllDataAsync();
+    }
+
+    // ── ROLE SETUP ────────────────────────────────
+
+    private void setupForRole() {
+        boolean isCustomer =
+                "CUSTOMER".equals(currentUser.getRole());
+        boolean isAdmin =
+                "ADMIN".equals(currentUser.getRole());
+
+        // Dashboard button — admin only
+        dashboardBtn.setVisible(isAdmin);
+        dashboardBtn.setManaged(isAdmin);
+
+        applyRoleBasedMenuBar(customerMenuBar);
+
+        if (isCustomer) {
+            setupCustomerPersonalView();
+        } else {
+            setupAdminView();
+        }
+    }
+
+    private void setupCustomerPersonalView() {
+        // Update header
+        moduleTitleLabel.setText("MY VEHICLE PORTAL");
+        moduleSubLabel.setText(
+                "Your vehicles, services, insurance and queries");
+
+        // Tab 1 — switch to profile view
+        tab1.setText("👤  My Profile");
+
+        // Hide admin controls
+        adminSearchBar.setVisible(false);
+        adminSearchBar.setManaged(false);
+        adminCustomerActions.setVisible(false);
+        adminCustomerActions.setManaged(false);
+        adminCustomerForm.setVisible(false);
+        adminCustomerForm.setManaged(false);
+        customerTable.setVisible(false);
+        customerTable.setManaged(false);
+
+        // Show customer profile card + vehicles
+        customerProfileCard.setVisible(true);
+        customerProfileCard.setManaged(true);
+        myVehiclesPanel.setVisible(true);
+        myVehiclesPanel.setManaged(true);
+
+        // Show extra tabs
+        myServicesTab.setDisable(false);
+        myServicesTab.getStyleClass().remove("hidden-tab");
+
+        myInsuranceTab.setDisable(false);
+        myInsuranceTab.getStyleClass().remove("hidden-tab");
+
+        // Query form — customer can submit, not respond
+        queryFormTitle.setText("Submit a Query");
+        respondBtn.setVisible(false);
+        respondBtn.setManaged(false);
+        saveQueryBtn.setText("SUBMIT QUERY");
+
+        // Hide filter for customers
+        // (they only see their own queries)
+        queryCustomerFilter.setVisible(false);
+        queryCustomerFilter.setManaged(false);
+        deleteQueryBtn.setVisible(false);
+        deleteQueryBtn.setManaged(false);
+    }
+
+    private void setupAdminView() {
+        // Admin sees full management view
+        moduleTitleLabel.setText("CUSTOMER MODULE");
+        moduleSubLabel.setText(
+                "Owner Information & Vehicle Queries");
+        tab1.setText("Customers");
+
+        // Hide customer-only tabs
+        myServicesTab.setDisable(true);
+        myInsuranceTab.setDisable(true);
+
+        // Show respond button for admin
+        respondBtn.setVisible(true);
+        respondBtn.setManaged(true);
+
+        customerSplitPane.getItems().remove(1);
     }
 
     // ── ASYNC LOADING ─────────────────────────────
@@ -98,31 +234,13 @@ public class CustomerController
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
-                allCustomers = customerDAO.getAllCustomers();
-                allQueries   = queryDAO.getAllQueries();
-                List<Vehicle> vehicles =
-                        vehicleDAO.getAllVehiclesWithOwners();
+                String role = currentUser.getRole();
 
-                Platform.runLater(() -> {
-                    // Customer tab
-                    customerTable.setItems(
-                            FXCollections.observableArrayList(
-                                    allCustomers));
-
-                    // Query combos
-                    queryCustomerCombo.setItems(
-                            FXCollections.observableArrayList(
-                                    allCustomers));
-                    queryCustomerFilter.setItems(
-                            FXCollections.observableArrayList(
-                                    allCustomers));
-                    queryVehicleCombo.setItems(
-                            FXCollections.observableArrayList(
-                                    vehicles));
-
-                    // Query table with pagination
-                    setupQueryPagination();
-                });
+                if ("CUSTOMER".equals(role)) {
+                    loadCustomerPersonalData();
+                } else {
+                    loadAdminData();
+                }
                 return null;
             }
         };
@@ -131,12 +249,138 @@ public class CustomerController
         t.start();
     }
 
-    // ── TABLE COLUMNS ─────────────────────────────
+    private void loadCustomerPersonalData() {
+        int cid = currentUser.getCustomerId();
+
+        // Load customer's own record
+        Customer me = customerDAO.getCustomerById(cid);
+
+        // Load their vehicles
+        List<Vehicle> myVehicles =
+                customerDAO.getVehiclesByCustomerId(cid);
+
+        // Load their queries
+        List<CustomerQuery> myQueries =
+                queryDAO.getQueriesByCustomer(cid);
+
+        // Load their service records
+        List<ServiceRecord> myServices =
+                serviceDAO.getServicesByCustomerId(cid);
+
+        // Load their insurance
+        List<InsuranceRecord> myInsurance =
+                insuranceDAO.getRecordsByCustomerId(cid);
+
+        Platform.runLater(() -> {
+            // Populate profile card
+            if (me != null) {
+                profileName.setText(me.getName());
+                profilePhone.setText(me.getPhone() != null
+                        ? me.getPhone() : "—");
+                profileEmail.setText(me.getEmail() != null
+                        ? me.getEmail() : "—");
+                profileAddress.setText(
+                        me.getAddress() != null
+                                ? me.getAddress() : "—");
+            }
+
+            // Populate vehicle cards
+            buildVehicleCards(myVehicles);
+
+            // Set query combos
+            List<Customer> meList = new ArrayList<>();
+            if (me != null) meList.add(me);
+            queryCustomerCombo.setItems(
+                    FXCollections.observableArrayList(meList));
+            queryCustomerCombo.setValue(me);
+            queryVehicleCombo.setItems(
+                    FXCollections.observableArrayList(myVehicles));
+
+            // Load queries
+            allQueries = myQueries;
+            setupQueryPagination();
+
+            // Load services table
+            myServicesTable.setItems(
+                    FXCollections.observableArrayList(myServices));
+
+            // Load insurance table
+            myInsuranceTable.setItems(
+                    FXCollections.observableArrayList(myInsurance));
+        });
+    }
+
+    private void loadAdminData() {
+        allCustomers = customerDAO.getAllCustomers();
+        allQueries   = queryDAO.getAllQueries();
+        List<Vehicle> vehicles =
+                vehicleDAO.getAllVehiclesWithOwners();
+
+        Platform.runLater(() -> {
+            customerTable.setItems(
+                    FXCollections.observableArrayList(
+                            allCustomers));
+            queryCustomerCombo.setItems(
+                    FXCollections.observableArrayList(
+                            allCustomers));
+            queryCustomerFilter.setItems(
+                    FXCollections.observableArrayList(
+                            allCustomers));
+            queryVehicleCombo.setItems(
+                    FXCollections.observableArrayList(vehicles));
+            setupQueryPagination();
+        });
+    }
+
+    // Build visual vehicle cards for customer view
+    private void buildVehicleCards(List<Vehicle> vehicles) {
+        myVehiclesList.getChildren().clear();
+
+        if (vehicles.isEmpty()) {
+            Label none = new Label(
+                    "No vehicles registered under your name.");
+            none.setStyle("-fx-text-fill: #555577; " +
+                    "-fx-font-size: 13px;");
+            myVehiclesList.getChildren().add(none);
+            return;
+        }
+
+        for (Vehicle v : vehicles) {
+            VBox card = new VBox(8);
+            card.getStyleClass().add("vehicle-mini-card");
+            card.setStyle(
+                    "-fx-background-color: #1a1a35;" +
+                            "-fx-background-radius: 10;" +
+                            "-fx-border-color: #2a2a4a;" +
+                            "-fx-border-radius: 10;" +
+                            "-fx-border-width: 1;" +
+                            "-fx-padding: 14;");
+
+            Label reg = new Label(
+                    v.getRegistrationNumber());
+            reg.setStyle(
+                    "-fx-text-fill: #e63946;" +
+                            "-fx-font-size: 16px;" +
+                            "-fx-font-weight: bold;");
+
+            Label details = new Label(
+                    v.getYear() + " " + v.getMake()
+                            + " " + v.getModel()
+                            + "  |  " + v.getColor());
+            details.setStyle(
+                    "-fx-text-fill: #aaaacc;" +
+                            "-fx-font-size: 13px;");
+
+            card.getChildren().addAll(reg, details);
+            myVehiclesList.getChildren().add(card);
+        }
+    }
+
+    // ── TABLE COLUMN SETUP ────────────────────────
 
     private void setupCustomerTableColumns() {
         customerTable.setColumnResizePolicy(
                 TableView.CONSTRAINED_RESIZE_POLICY);
-
         colName.prefWidthProperty().bind(
                 customerTable.widthProperty().multiply(0.25));
         colPhone.prefWidthProperty().bind(
@@ -153,13 +397,13 @@ public class CustomerController
         colEmail.setCellValueFactory(d ->
                 new SimpleStringProperty(d.getValue().getEmail()));
         colAddress.setCellValueFactory(d ->
-                new SimpleStringProperty(d.getValue().getAddress()));
+                new SimpleStringProperty(
+                        d.getValue().getAddress()));
     }
 
     private void setupQueryTableColumns() {
         queryTable.setColumnResizePolicy(
                 TableView.CONSTRAINED_RESIZE_POLICY);
-
         colQCustomer.prefWidthProperty().bind(
                 queryTable.widthProperty().multiply(0.18));
         colQVehicle.prefWidthProperty().bind(
@@ -183,26 +427,23 @@ public class CustomerController
         colQText.setCellValueFactory(d ->
                 new SimpleStringProperty(
                         d.getValue().getQueryText()));
-
-        // Color code status
         colQStatus.setCellFactory(col -> new TableCell<>() {
             @Override
-            protected void updateItem(String item, boolean empty) {
+            protected void updateItem(String item,
+                                      boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
+                    setText(null); setStyle("");
                 } else {
                     setText(item);
                     setStyle("Answered".equals(item)
-                            ? "-fx-text-fill: #44cc88; " +
+                            ? "-fx-text-fill: #44cc88;" +
                             "-fx-font-weight: bold;"
-                            : "-fx-text-fill: #e63946; " +
+                            : "-fx-text-fill: #e63946;" +
                             "-fx-font-weight: bold;");
                 }
             }
         });
-
         colQStatus.setCellValueFactory(d ->
                 new SimpleStringProperty(
                         d.getValue().getResponseText() != null
@@ -210,12 +451,86 @@ public class CustomerController
                                 ? "Answered" : "Pending"));
     }
 
+    private void setupServiceTableColumns() {
+        if (myServicesTable == null) return;
+        myServicesTable.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY);
+        colSVehicle.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getVehicleReg()));
+        colSDate.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getDate().toString()));
+        colSType.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getServiceType()));
+        colSDesc.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getDescription()));
+        colSCost.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        "M " + d.getValue().getCost()));
+    }
+
+    private void setupInsuranceTableColumns() {
+        if (myInsuranceTable == null) return;
+        myInsuranceTable.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY);
+        colIVehicle.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getVehicleReg()));
+        colIProvider.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getProviderName()));
+        colIPolicy.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getPolicyNumber()));
+        colIStart.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getDate() != null
+                                ? d.getValue().getDate().toString()
+                                : "—"));
+        colIEnd.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getEndDate() != null
+                                ? d.getValue().getEndDate().toString()
+                                : "—"));
+        colIStatus.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getStatus()));
+
+        colIStatus.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item,
+                                      boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null); setStyle("");
+                } else {
+                    setText(item);
+                    setStyle(switch (item) {
+                        case "Active" ->
+                                "-fx-text-fill: #44cc88;" +
+                                        "-fx-font-weight: bold;";
+                        case "Expired" ->
+                                "-fx-text-fill: #ffaa00;" +
+                                        "-fx-font-weight: bold;";
+                        default ->
+                                "-fx-text-fill: #e63946;" +
+                                        "-fx-font-weight: bold;";
+                    });
+                }
+            }
+        });
+    }
+
     // ── PAGINATION ────────────────────────────────
 
     private void setupQueryPagination() {
         if (allQueries == null || allQueries.isEmpty()) {
             queryPagination.setPageCount(1);
-            queryTable.setItems(FXCollections.emptyObservableList());
+            queryTable.setItems(
+                    FXCollections.emptyObservableList());
             return;
         }
         int pages = (int) Math.ceil(
@@ -231,14 +546,14 @@ public class CustomerController
         int from = page * QUERIES_PER_PAGE;
         int to   = Math.min(from + QUERIES_PER_PAGE,
                 allQueries.size());
-        queryTable.setItems(FXCollections.observableArrayList(
-                allQueries.subList(from, to)));
+        queryTable.setItems(
+                FXCollections.observableArrayList(
+                        allQueries.subList(from, to)));
     }
 
     // ── CUSTOMER CRUD ─────────────────────────────
 
-    @FXML
-    private void handleAddCustomer() {
+    @FXML private void handleAddCustomer() {
         isEditMode = false;
         selectedCustomer = null;
         customerFormTitle.setText("Add New Customer");
@@ -246,8 +561,7 @@ public class CustomerController
         clearCustomerForm();
     }
 
-    @FXML
-    private void handleEditCustomer() {
+    @FXML private void handleEditCustomer() {
         Customer c = customerTable.getSelectionModel()
                 .getSelectedItem();
         if (c == null) {
@@ -259,22 +573,19 @@ public class CustomerController
         selectedCustomer = c;
         customerFormTitle.setText("Edit Customer");
         customerSaveBtn.setText("UPDATE CUSTOMER");
-
         fieldName.setText(c.getName());
         fieldPhone.setText(c.getPhone());
         fieldEmail.setText(c.getEmail());
         fieldAddress.setText(c.getAddress());
     }
 
-    @FXML
-    private void handleSaveCustomer() {
+    @FXML private void handleSaveCustomer() {
         if (fieldName.getText().isEmpty()
                 || fieldPhone.getText().isEmpty()) {
             showStatus(customerFormStatus,
                     "⚠ Name and phone are required.", false);
             return;
         }
-
         Customer c = new Customer();
         c.setName(fieldName.getText().trim());
         c.setPhone(fieldPhone.getText().trim());
@@ -288,69 +599,62 @@ public class CustomerController
         } else {
             success = customerDAO.addCustomer(c);
         }
-
+        showStatus(customerFormStatus,
+                success ? "✅ Customer saved."
+                        : "❌ Failed to save.", success);
         if (success) {
-            showStatus(customerFormStatus,
-                    "✅ Customer saved successfully.", true);
             clearCustomerForm();
             loadAllDataAsync();
-        } else {
-            showStatus(customerFormStatus,
-                    "❌ Failed to save customer.", false);
         }
     }
 
-    @FXML
-    private void handleDeleteCustomer() {
+    @FXML private void handleDeleteCustomer() {
         Customer c = customerTable.getSelectionModel()
                 .getSelectedItem();
         if (c == null) {
             showStatus(customerStatusLabel,
-                    "⚠ Select a customer to delete.", false);
+                    "⚠ Select a customer.", false);
             return;
         }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        Alert confirm = new Alert(
+                Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirm Delete");
         confirm.setHeaderText("Delete " + c.getName() + "?");
-        confirm.setContentText(
-                "This will also remove their vehicles and queries.");
-
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
+        confirm.showAndWait().ifPresent(res -> {
+            if (res == ButtonType.OK) {
                 boolean ok = customerDAO.deleteCustomer(
                         c.getId());
                 showStatus(customerStatusLabel,
-                        ok ? "✅ Customer deleted."
-                                : "❌ Delete failed.", ok);
+                        ok ? "✅ Deleted." : "❌ Failed.", ok);
                 if (ok) loadAllDataAsync();
             }
         });
     }
 
-    @FXML
-    private void handleCustomerSearch() {
+    @FXML private void handleCustomerSearch() {
         String q = customerSearchField.getText()
                 .toLowerCase().trim();
         if (q.isEmpty()) {
             customerTable.setItems(
-                    FXCollections.observableArrayList(allCustomers));
+                    FXCollections.observableArrayList(
+                            allCustomers));
             return;
         }
-        List<Customer> filtered = allCustomers.stream()
-                .filter(c ->
-                        c.getName().toLowerCase().contains(q)
-                                || (c.getPhone() != null
-                                && c.getPhone().toLowerCase().contains(q))
-                                || (c.getEmail() != null
-                                && c.getEmail().toLowerCase().contains(q)))
-                .collect(Collectors.toList());
         customerTable.setItems(
-                FXCollections.observableArrayList(filtered));
+                FXCollections.observableArrayList(
+                        allCustomers.stream()
+                                .filter(c ->
+                                        c.getName().toLowerCase().contains(q)
+                                                || (c.getPhone() != null &&
+                                                c.getPhone().toLowerCase()
+                                                        .contains(q))
+                                                || (c.getEmail() != null &&
+                                                c.getEmail().toLowerCase()
+                                                        .contains(q)))
+                                .collect(Collectors.toList())));
     }
 
-    @FXML
-    private void handleClearCustomer() {
+    @FXML private void handleClearCustomer() {
         customerSearchField.clear();
         customerTable.setItems(
                 FXCollections.observableArrayList(allCustomers));
@@ -359,44 +663,42 @@ public class CustomerController
 
     // ── QUERY CRUD ────────────────────────────────
 
-    @FXML
-    private void handleNewQuery() {
-        queryFormTitle.setText("New Query");
-        queryCustomerCombo.setValue(null);
-        queryVehicleCombo.setValue(null);
-        queryDatePicker.setValue(LocalDate.now());
+    @FXML private void handleNewQuery() {
         queryTextField.clear();
         responseTextField.clear();
+        queryDatePicker.setValue(LocalDate.now());
+        if ("CUSTOMER".equals(currentUser.getRole())) {
+            // Customer field already pre-set
+        } else {
+            queryCustomerCombo.setValue(null);
+            queryVehicleCombo.setValue(null);
+        }
     }
 
-    @FXML
-    private void handleQuerySelected() {
+    @FXML private void handleQuerySelected() {
         CustomerQuery q = queryTable.getSelectionModel()
                 .getSelectedItem();
         if (q == null) return;
-
         queryTextField.setText(q.getQueryText());
         responseTextField.setText(
                 q.getResponseText() != null
                         ? q.getResponseText() : "");
         queryDatePicker.setValue(q.getDate());
-        queryFormTitle.setText("Query #" + q.getQueryId());
     }
 
-    @FXML
-    private void handleSaveQuery() {
-        if (queryCustomerCombo.getValue() == null
-                || queryVehicleCombo.getValue() == null
+    @FXML private void handleSaveQuery() {
+        if (queryVehicleCombo.getValue() == null
                 || queryTextField.getText().isEmpty()) {
             showStatus(queryFormStatus,
-                    "⚠ Customer, vehicle and query are required.",
+                    "⚠ Vehicle and query text are required.",
                     false);
             return;
         }
-
         CustomerQuery q = new CustomerQuery();
         q.setCustomerId(
-                queryCustomerCombo.getValue().getId());
+                queryCustomerCombo.getValue() != null
+                        ? queryCustomerCombo.getValue().getId()
+                        : currentUser.getCustomerId());
         q.setVehicleId(
                 queryVehicleCombo.getValue().getVehicleId());
         q.setDate(queryDatePicker.getValue() != null
@@ -405,16 +707,15 @@ public class CustomerController
 
         boolean success = queryDAO.addQuery(q);
         showStatus(queryFormStatus,
-                success ? "✅ Query saved." : "❌ Failed.",
-                success);
+                success ? "✅ Query submitted successfully."
+                        : "❌ Failed to submit.", success);
         if (success) {
             handleNewQuery();
             loadAllDataAsync();
         }
     }
 
-    @FXML
-    private void handleRespondQuery() {
+    @FXML private void handleRespondQuery() {
         CustomerQuery q = queryTable.getSelectionModel()
                 .getSelectedItem();
         if (q == null) {
@@ -424,48 +725,42 @@ public class CustomerController
         }
         if (responseTextField.getText().isEmpty()) {
             showStatus(queryFormStatus,
-                    "⚠ Enter a response first.", false);
+                    "⚠ Enter a response.", false);
             return;
         }
-
         boolean success = queryDAO.respondToQuery(
                 q.getQueryId(),
                 responseTextField.getText().trim());
         showStatus(queryFormStatus,
                 success ? "✅ Response saved."
-                        : "❌ Failed to save response.",
-                success);
+                        : "❌ Failed.", success);
         if (success) loadAllDataAsync();
     }
 
-    @FXML
-    private void handleQueryFilter() {
+    @FXML private void handleQueryFilter() {
         Customer selected = queryCustomerFilter.getValue();
         if (selected == null) return;
-
         allQueries = queryDAO.getQueriesByCustomer(
                 selected.getId());
         setupQueryPagination();
     }
 
-    @FXML
-    private void handleClearQuery() {
+    @FXML private void handleClearQuery() {
         queryCustomerFilter.setValue(null);
         loadAllDataAsync();
     }
 
-    @FXML
-    private void handleDeleteQuery() {
+    @FXML private void handleDeleteQuery() {
         CustomerQuery q = queryTable.getSelectionModel()
                 .getSelectedItem();
         if (q == null) {
             showStatus(queryStatusLabel,
-                    "⚠ Select a query to delete.", false);
+                    "⚠ Select a query.", false);
             return;
         }
         boolean ok = queryDAO.deleteQuery(q.getQueryId());
         showStatus(queryStatusLabel,
-                ok ? "✅ Query deleted." : "❌ Delete failed.", ok);
+                ok ? "✅ Deleted." : "❌ Failed.", ok);
         if (ok) loadAllDataAsync();
     }
 
@@ -474,11 +769,14 @@ public class CustomerController
     @FXML private void goToDashboard() {
         goToDashboard(userLabel);
     }
-    @FXML private void handleRefresh() { loadAllDataAsync(); }
-    @FXML private void handleExit() { Platform.exit(); }
+    @FXML private void handleRefresh() {
+        loadAllDataAsync();
+    }
+    @FXML private void handleExit() {
+        javafx.application.Platform.exit();
+    }
 
-    @FXML
-    private void handleLogout() {
+    @FXML private void handleLogout() {
         try {
             DBConnection.closeConnection();
             FXMLLoader loader = new FXMLLoader(
@@ -488,7 +786,7 @@ public class CustomerController
             Stage stage =
                     (Stage) userLabel.getScene().getWindow();
             stage.setScene(scene);
-            stage.setMaximized(true);
+            BaseModuleController.applyStageDefaults(stage);
         } catch (Exception e) {
             System.err.println("Logout: " + e.getMessage());
         }
@@ -535,8 +833,7 @@ public class CustomerController
     private void applyStyles(Scene scene, String css) {
         java.net.URL base =
                 getClass().getResource("/styles/base.css");
-        java.net.URL page =
-                getClass().getResource(css);
+        java.net.URL page = getClass().getResource(css);
         if (base != null)
             scene.getStylesheets().add(base.toExternalForm());
         if (page != null)

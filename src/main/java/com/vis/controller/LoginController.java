@@ -92,37 +92,95 @@ public class LoginController implements Initializable {
 
     private void navigateToDashboard(User user) {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/fxml/Dashboard.fxml")
-            );
-            Scene scene = new Scene(loader.load());
-            URL cssUrl = getClass().getResource("/styles/dashboard.css");
-            if (cssUrl != null) {
-                applyStyles(scene, "/styles/dashboard.css");
-                System.out.println("✅ CSS loaded: " + cssUrl);
-            } else {
-                System.err.println("❌ CSS not found — check file location");
+            String fxmlPath;
+            String cssPath;
+
+            // Route based on role
+            switch (user.getRole()) {
+                case "ADMIN" -> {
+                    fxmlPath = "/fxml/Dashboard.fxml";
+                    cssPath  = "/styles/dashboard.css";
+                }
+                case "WORKSHOP" -> {
+                    fxmlPath = "/fxml/Workshop.fxml";
+                    cssPath  = "/styles/workshop.css";
+                }
+                case "CUSTOMER" -> {
+                    fxmlPath = "/fxml/Customer.fxml";
+                    cssPath  = "/styles/customer.css";
+                }
+                case "POLICE" -> {
+                    fxmlPath = "/fxml/Police.fxml";
+                    cssPath  = "/styles/police.css";
+                }
+                case "INSURANCE" -> {
+                    fxmlPath = "/fxml/Insurance.fxml";
+                    cssPath  = "/styles/insurance.css";
+                }
+                default -> {
+                    showError("Unknown role: " + user.getRole());
+                    return;
+                }
             }
 
-            // Pass the logged-in user to the dashboard
-            DashboardController controller = loader.getController();
-            controller.initUser(user);
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource(fxmlPath));
+            Scene scene = new Scene(loader.load());
+            applyStyles(scene, cssPath);
+
+            // Pass user to controller
+            Object controller = loader.getController();
+            if (controller instanceof DashboardController dc) {
+                dc.initUser(user);
+            } else if (controller instanceof BaseModuleController bmc) {
+                bmc.initUser(user);
+            }
 
             Stage stage = (Stage) loginButton.getScene().getWindow();
             stage.setScene(scene);
-            stage.setMaximized(true); // ← Fullscreen on dashboard too
+            BaseModuleController.applyStageDefaults(stage);
 
         } catch (Exception e) {
-            showError("Failed to load dashboard.");
+            showError("Failed to load screen.");
             System.err.println("Navigation error: " + e.getMessage());
         }
     }
 
+    @FXML
+    private void goToLanding() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/fxml/Landing.fxml"));
+            Scene scene = new Scene(loader.load());
+            applyStyles(scene, "/styles/landing.css");
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+
+            FadeTransition fade = new FadeTransition(
+                    Duration.millis(300),
+                    stage.getScene().getRoot());
+            fade.setFromValue(1.0);
+            fade.setToValue(0.0);
+            fade.setOnFinished(e -> {
+                stage.setScene(scene);
+                      // ← Opens fullscreen
+                stage.setMinWidth(1000);
+                stage.setMinHeight(650);
+            });
+            fade.play();
+
+        } catch (Exception e) {
+            System.err.println("Landing error: " + e.getMessage());
+        }
+    }
+
+    // Add this helper
     private void applyStyles(Scene scene, String pageCSS) {
         URL base = getClass().getResource("/styles/base.css");
         URL page = getClass().getResource(pageCSS);
-        if (base != null) scene.getStylesheets().add(base.toExternalForm());
-        if (page != null) scene.getStylesheets().add(page.toExternalForm());
+        if (base != null)
+            scene.getStylesheets().add(base.toExternalForm());
+        if (page != null)
+            scene.getStylesheets().add(page.toExternalForm());
     }
 
     // ── UI HELPERS ───────────────────────────────
@@ -147,4 +205,7 @@ public class LoginController implements Initializable {
         );
         shake.play();
     }
+
+
+
 }

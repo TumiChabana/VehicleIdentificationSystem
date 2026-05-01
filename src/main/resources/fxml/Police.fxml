@@ -4,6 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.*?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.PoliceController"
@@ -12,7 +14,7 @@
     <!-- ═══ TOP ═══ -->
     <top>
         <VBox>
-            <MenuBar styleClass="menu-bar">
+            <MenuBar fx:id="policeMenuBar" styleClass="menu-bar">
                 <Menu text="File">
                     <MenuItem text="Refresh"
                               onAction="#handleRefresh"/>
@@ -21,30 +23,44 @@
                               onAction="#handleExit"/>
                 </Menu>
                 <Menu text="Modules">
-                    <MenuItem text="⬛  Dashboard"
-                              onAction="#goToDashboard"/>
-                    <MenuItem text="🔧  Workshop"
+                    <MenuItem text="Workshop"
                               onAction="#openWorkshop"/>
-                    <MenuItem text="👤  Customer"
+                    <MenuItem text="Customer"
                               onAction="#openCustomer"/>
-                    <MenuItem text="🛡  Insurance"
+                    <MenuItem text="Insurance"
                               onAction="#openInsurance"/>
                 </Menu>
             </MenuBar>
 
             <HBox styleClass="top-header"
                   alignment="CENTER_LEFT" spacing="20">
-                <Label text="VIS" styleClass="header-logo"/>
-                <VBox>
-                    <Label text="POLICE MODULE"
-                           styleClass="header-title"/>
-                    <Label text="Reports &amp; Violations"
-                           styleClass="header-sub"/>
-                </VBox>
+                <HBox spacing="9">
+                    <!-- Logo + Title -->
+                    <ImageView fitHeight="40" fitWidth="40"
+                               pickOnBounds="true" preserveRatio="true" >
+                        <image>
+                            <Image url="/images/logo3.png"/>
+                        </image>
+                    </ImageView>
+
+                    <VBox>
+                        <Label fx:id="moduleTitleLabel"
+                               text="POLICE"
+                               styleClass="header-title"/>
+                        <Label fx:id="moduleSubLabel"
+                               text="Reports &amp; Violations"
+                               styleClass="header-sub"/>
+                    </VBox>
+
+                </HBox>
+
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="userLabel"
                        text="" styleClass="role-badge"/>
-                <Button text="← Dashboard"
+
+
+                <Button fx:id="dashboardBtn"
+                        text="← Dashboard"
                         styleClass="btn-secondary"
                         onAction="#goToDashboard"/>
                 <Button text="Logout"
@@ -64,7 +80,7 @@
                 <!-- ══════════════════════════
                      TAB 1 — POLICE REPORTS
                 ══════════════════════════ -->
-                <Tab text="🚔  Police Reports" closable="false">
+                <Tab text="Police Reports" closable="false">
                     <SplitPane dividerPositions="0.62"
                                styleClass="split-pane">
 
@@ -83,7 +99,7 @@
                                           prefWidth="200"
                                           onAction="#handleReportFilter"/>
                                 <TextField fx:id="reportSearchField"
-                                           promptText="🔍  Search by officer or vehicle..."
+                                           promptText="Search by officer or vehicle..."
                                            styleClass="form-field"
                                            HBox.hgrow="ALWAYS"
                                            onKeyReleased="#handleReportSearch"/>
@@ -117,7 +133,7 @@
                             </TableView>
 
                             <HBox spacing="10">
-                                <Button text="🗑 Delete Selected"
+                                <Button text="Delete Selected"
                                         styleClass="btn-danger"
                                         onAction="#handleDeleteReport"/>
                                 <Region HBox.hgrow="ALWAYS"/>
@@ -194,7 +210,7 @@
                 <!-- ══════════════════════════
                      TAB 2 — VIOLATIONS
                 ══════════════════════════ -->
-                <Tab text="⚠️  Violations" closable="false">
+                <Tab text="Violations" closable="false">
                     <SplitPane dividerPositions="0.62"
                                styleClass="split-pane">
 
@@ -213,7 +229,7 @@
                                           prefWidth="180"
                                           onAction="#handleViolationFilter"/>
                                 <TextField fx:id="violationSearchField"
-                                           promptText="🔍  Search by type or vehicle..."
+                                           promptText="Search by type or vehicle..."
                                            styleClass="form-field"
                                            HBox.hgrow="ALWAYS"
                                            onKeyReleased="#handleViolationSearch"/>
@@ -248,13 +264,13 @@
 
                             <!-- Mark paid/unpaid buttons -->
                             <HBox spacing="10">
-                                <Button text="✅ Mark as Paid"
+                                <Button text="Mark as Paid"
                                         styleClass="btn-primary"
                                         onAction="#handleMarkPaid"/>
                                 <Button text="↩ Mark as Unpaid"
                                         styleClass="btn-secondary"
                                         onAction="#handleMarkUnpaid"/>
-                                <Button text="🗑 Delete"
+                                <Button text="Delete"
                                         styleClass="btn-danger"
                                         onAction="#handleDeleteViolation"/>
                                 <Region HBox.hgrow="ALWAYS"/>

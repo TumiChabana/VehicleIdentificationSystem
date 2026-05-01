@@ -65,6 +65,10 @@ public class PoliceController
     @FXML private ComboBox<String> violationStatusCombo;
 
     @FXML private Label userLabel;
+    @FXML private Label moduleTitleLabel;
+    @FXML private Label moduleSubLabel;
+    @FXML private Button dashboardBtn;
+    @FXML private MenuBar policeMenuBar;
 
     // ── DAOs ─────────────────────────────────────
     private final PoliceDAO policeDAO   = new PoliceDAO();
@@ -80,9 +84,15 @@ public class PoliceController
         setupComboOptions();
     }
 
+
     @Override
     protected void onUserLoaded() {
         userLabel.setText(currentUser.getRole());
+        dashboardBtn.setVisible(
+                "ADMIN".equals(currentUser.getRole()));
+        dashboardBtn.setManaged(
+                "ADMIN".equals(currentUser.getRole()));
+        setupForRole();
         loadAllDataAsync();
     }
 
@@ -92,8 +102,21 @@ public class PoliceController
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
-                allReports    = policeDAO.getAllReports();
-                allViolations = policeDAO.getAllViolations();
+                String role = currentUser.getRole();
+                int userId  = currentUser.getUserId();
+
+                if ("POLICE".equals(role)) {
+                    // Officer sees only their own records
+                    allReports    =
+                            policeDAO.getReportsByUserId(userId);
+                    allViolations =
+                            policeDAO.getViolationsByUserId(userId);
+                } else {
+                    // Admin sees everything
+                    allReports    = policeDAO.getAllReports();
+                    allViolations = policeDAO.getAllViolations();
+                }
+
                 List<Vehicle> vehicles =
                         vehicleDAO.getAllVehiclesWithOwners();
 
@@ -295,8 +318,8 @@ public class PoliceController
 
         boolean success = policeDAO.addReport(r);
         showStatus(reportFormStatus,
-                success ? "✅ Report filed successfully."
-                        : "❌ Failed to file report.", success);
+                success ? "Report filed successfully."
+                        : "Failed to file report.", success);
         if (success) {
             handleAddReport();
             loadAllDataAsync();
@@ -309,7 +332,7 @@ public class PoliceController
                 .getSelectedItem();
         if (r == null) {
             showStatus(reportStatusLabel,
-                    "⚠ Select a report to delete.", false);
+                    "Select a report to delete.", false);
             return;
         }
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
@@ -320,8 +343,8 @@ public class PoliceController
                 boolean ok = policeDAO.deleteReport(
                         r.getRecordId());
                 showStatus(reportStatusLabel,
-                        ok ? "✅ Report deleted."
-                                : "❌ Delete failed.", ok);
+                        ok ? "Report deleted."
+                                : "Delete failed.", ok);
                 if (ok) loadAllDataAsync();
             }
         });
@@ -389,7 +412,7 @@ public class PoliceController
                 || violationTypeCombo.getValue() == null
                 || violationFineField.getText().isEmpty()) {
             showStatus(violationFormStatus,
-                    "⚠ Please fill in all required fields.",
+                    "Please fill in all required fields.",
                     false);
             return;
         }
@@ -412,15 +435,15 @@ public class PoliceController
 
             boolean success = policeDAO.addViolation(v);
             showStatus(violationFormStatus,
-                    success ? "✅ Violation recorded."
-                            : "❌ Failed.", success);
+                    success ? "Violation recorded."
+                            : "Failed.", success);
             if (success) {
                 handleAddViolation();
                 loadAllDataAsync();
             }
         } catch (NumberFormatException e) {
             showStatus(violationFormStatus,
-                    "⚠ Fine amount must be a number.", false);
+                    "Fine amount must be a number.", false);
         }
     }
 
@@ -445,8 +468,8 @@ public class PoliceController
         boolean ok = policeDAO.updateViolationStatus(
                 v.getViolationId(), status);
         showStatus(violationStatusLabel,
-                ok ? "✅ Status updated to " + status + "."
-                        : "❌ Update failed.", ok);
+                ok ? "Status updated to " + status + "."
+                        : "Update failed.", ok);
         if (ok) loadAllDataAsync();
     }
 
@@ -456,7 +479,7 @@ public class PoliceController
                 .getSelectedItem();
         if (v == null) {
             showStatus(violationStatusLabel,
-                    "⚠ Select a violation to delete.", false);
+                    "Select a violation to delete.", false);
             return;
         }
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
@@ -467,7 +490,7 @@ public class PoliceController
                 boolean ok = policeDAO.deleteViolation(
                         v.getViolationId());
                 showStatus(violationStatusLabel,
-                        ok ? "✅ Deleted." : "❌ Failed.", ok);
+                        ok ? "Deleted." : "Failed.", ok);
                 if (ok) loadAllDataAsync();
             }
         });
@@ -541,7 +564,7 @@ public class PoliceController
             Stage stage =
                     (Stage) userLabel.getScene().getWindow();
             stage.setScene(scene);
-            stage.setMaximized(true);
+            BaseModuleController.applyStageDefaults(stage);
         } catch (Exception e) {
             System.err.println("Logout: " + e.getMessage());
         }
@@ -585,4 +608,36 @@ public class PoliceController
         if (page != null)
             scene.getStylesheets().add(page.toExternalForm());
     }
+
+    private void setupForRole() {
+        boolean isPolice =
+                "POLICE".equals(currentUser.getRole());
+        boolean isAdmin =
+                "ADMIN".equals(currentUser.getRole());
+
+        // Dashboard button — admin only
+        dashboardBtn.setVisible(isAdmin);
+        dashboardBtn.setManaged(isAdmin);
+
+        if (isPolice) {
+            // Personalize header for officer
+            moduleTitleLabel.setText("OFFICER DASHBOARD");
+            moduleSubLabel.setText(
+                    "Your reports and recorded violations");
+
+            // Officer cannot delete reports
+            // they didn't file — hide delete for safety
+            // They CAN add new ones though
+        }
+
+        applyRoleBasedMenuBar(policeMenuBar);
+
+        if (isAdmin) {
+            moduleTitleLabel.setText("POLICE MODULE");
+            moduleSubLabel.setText(
+                    "All Reports & Violations");
+        }
+    }
+
+
 }

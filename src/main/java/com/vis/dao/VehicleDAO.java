@@ -127,7 +127,7 @@ public class VehicleDAO {
     public List<Vehicle> getAllVehiclesWithOwners() {
         List<Vehicle> list = new ArrayList<>();
         String sql = """
-        SELECT v.*, c.name as owner_name
+        SELECT v.*, c.name as owner_name, v.image_path
         FROM vehicle v
         LEFT JOIN customer c ON v.owner_id = c.customer_id
         ORDER BY v.vehicle_id
@@ -140,6 +140,7 @@ public class VehicleDAO {
             while (rs.next()) {
                 Vehicle v = mapRow(rs);
                 v.setOwnerName(rs.getString("owner_name"));
+                v.setImagePath(rs.getString("image_path"));
                 list.add(v);
             }
 
@@ -148,6 +149,8 @@ public class VehicleDAO {
                     + e.getMessage());
         }
         return list;
+
+
     }
 
     // MAP DATABASE ROW → Vehicle object
@@ -161,5 +164,7 @@ public class VehicleDAO {
                 rs.getString("color"),
                 rs.getInt("owner_id")
         );
+
     }
+
 }

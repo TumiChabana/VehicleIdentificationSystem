@@ -9,10 +9,9 @@
             fx:controller="com.vis.controller.CustomerController"
             styleClass="root-pane">
 
-    <!-- ═══ TOP ═══ -->
     <top>
         <VBox>
-            <MenuBar styleClass="menu-bar">
+            <MenuBar fx:id="customerMenuBar" styleClass="menu-bar">
                 <Menu text="File">
                     <MenuItem text="Refresh"
                               onAction="#handleRefresh"/>
@@ -21,32 +20,33 @@
                               onAction="#handleExit"/>
                 </Menu>
                 <Menu text="Modules">
-                    <MenuItem text="⬛  Dashboard"
+                    <MenuItem text="Dashboard"
                               onAction="#goToDashboard"/>
-                    <MenuItem text="🔧  Workshop"
+                    <MenuItem text="Workshop"
                               onAction="#openWorkshop"/>
-                    <MenuItem text="🚔  Police"
+                    <MenuItem text="Police"
                               onAction="#openPolice"/>
-                    <MenuItem text="🛡  Insurance"
+                    <MenuItem text="Insurance"
                               onAction="#openInsurance"/>
                 </Menu>
             </MenuBar>
 
-            <!-- Header -->
             <HBox styleClass="top-header"
                   alignment="CENTER_LEFT" spacing="20">
                 <Label text="VIS" styleClass="header-logo"/>
                 <VBox>
-                    <Label text="CUSTOMER MODULE"
+                    <Label fx:id="moduleTitleLabel"
+                           text="CUSTOMER MODULE"
                            styleClass="header-title"/>
-                    <Label text="Owner Information &amp; Vehicle Queries"
+                    <Label fx:id="moduleSubLabel"
+                           text="Owner Information &amp; Queries"
                            styleClass="header-sub"/>
                 </VBox>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="userLabel"
-                       text=""
-                       styleClass="role-badge"/>
-                <Button text="← Dashboard"
+                       text="" styleClass="role-badge"/>
+                <Button fx:id="dashboardBtn"
+                        text="← Dashboard"
                         styleClass="btn-secondary"
                         onAction="#goToDashboard"/>
                 <Button text="Logout"
@@ -56,36 +56,36 @@
         </VBox>
     </top>
 
-    <!-- ═══ CENTER ═══ -->
     <center>
         <VBox styleClass="main-content">
-
             <TabPane fx:id="customerTabs"
                      styleClass="module-tabs"
                      VBox.vgrow="ALWAYS">
 
-                <!-- ══════════════════════════
-                     TAB 1 — CUSTOMERS
-                ══════════════════════════ -->
-                <Tab text="👤  Customers" closable="false">
-                    <SplitPane dividerPositions="0.62"
+                <!-- ══ TAB 1 — CUSTOMERS (Admin) / MY PROFILE (Customer) ══ -->
+                <Tab fx:id="tab1"
+                     text="Customers"
+                     closable="false">
+                    <SplitPane fx:id="customerSplitPane" dividerPositions="0.62"
                                styleClass="split-pane">
 
-                        <!-- LEFT: Customer Table -->
-                        <VBox styleClass="panel-card" spacing="14">
+                        <!-- LEFT: Table (Admin) / Profile Card (Customer) -->
+                        <VBox fx:id="adminCustomerPanel"
+                              styleClass="panel-card" spacing="14">
                             <padding>
                                 <Insets top="20" right="20"
                                         bottom="20" left="20"/>
                             </padding>
 
-                            <HBox spacing="12"
+                            <!-- ADMIN SEARCH (hidden for customer) -->
+                            <HBox fx:id="adminSearchBar"
+                                  spacing="12"
                                   alignment="CENTER_LEFT">
-                                <TextField
-                                        fx:id="customerSearchField"
-                                        promptText="🔍  Search by name, phone or email..."
-                                        styleClass="form-field"
-                                        HBox.hgrow="ALWAYS"
-                                        onKeyReleased="#handleCustomerSearch"/>
+                                <TextField fx:id="customerSearchField"
+                                           promptText="Search..."
+                                           styleClass="form-field"
+                                           HBox.hgrow="ALWAYS"
+                                           onKeyReleased="#handleCustomerSearch"/>
                                 <Button text="+ Add Customer"
                                         styleClass="btn-primary"
                                         onAction="#handleAddCustomer"/>
@@ -94,6 +94,50 @@
                                         onAction="#handleClearCustomer"/>
                             </HBox>
 
+                            <!-- CUSTOMER PROFILE CARD (hidden for admin) -->
+                            <VBox fx:id="customerProfileCard"
+                                  styleClass="stat-card"
+                                  spacing="16"
+                                  visible="false"
+                                  managed="false">
+                                <Label text="MY PROFILE"
+                                       styleClass="section-title"/>
+                                <HBox styleClass="detail-row" spacing="8">
+                                    <Label text="NAME"
+                                           styleClass="detail-key"
+                                           minWidth="80"/>
+                                    <Label fx:id="profileName"
+                                           text="—"
+                                           styleClass="detail-value"/>
+                                </HBox>
+                                <HBox styleClass="detail-row" spacing="8">
+                                    <Label text="PHONE"
+                                           styleClass="detail-key"
+                                           minWidth="80"/>
+                                    <Label fx:id="profilePhone"
+                                           text="—"
+                                           styleClass="detail-value"/>
+                                </HBox>
+                                <HBox styleClass="detail-row" spacing="8">
+                                    <Label text="EMAIL"
+                                           styleClass="detail-key"
+                                           minWidth="80"/>
+                                    <Label fx:id="profileEmail"
+                                           text="—"
+                                           styleClass="detail-value"/>
+                                </HBox>
+                                <HBox styleClass="detail-row" spacing="8">
+                                    <Label text="ADDRESS"
+                                           styleClass="detail-key"
+                                           minWidth="80"/>
+                                    <Label fx:id="profileAddress"
+                                           text="—"
+                                           styleClass="detail-value"
+                                           wrapText="true"/>
+                                </HBox>
+                            </VBox>
+
+                            <!-- SHARED TABLE -->
                             <TableView fx:id="customerTable"
                                        styleClass="table-view"
                                        VBox.vgrow="ALWAYS">
@@ -113,11 +157,13 @@
                                 </placeholder>
                             </TableView>
 
-                            <HBox spacing="10">
-                                <Button text="✏ Edit Selected"
+                            <!-- ADMIN ACTIONS (hidden for customer) -->
+                            <HBox fx:id="adminCustomerActions"
+                                  spacing="10">
+                                <Button text="Edit Selected"
                                         styleClass="btn-secondary"
                                         onAction="#handleEditCustomer"/>
-                                <Button text="🗑 Delete Selected"
+                                <Button text="Delete Selected"
                                         styleClass="btn-danger"
                                         onAction="#handleDeleteCustomer"/>
                                 <Region HBox.hgrow="ALWAYS"/>
@@ -127,10 +173,13 @@
                             </HBox>
                         </VBox>
 
-                        <!-- RIGHT: Customer Form -->
+                        <!-- RIGHT: Form (Admin) / My Vehicles (Customer) -->
                         <ScrollPane styleClass="scroll-pane"
                                     fitToWidth="true">
-                            <VBox styleClass="panel-card"
+
+                            <!-- ADMIN FORM -->
+                            <VBox fx:id="adminCustomerForm"
+                                  styleClass="panel-card"
                                   spacing="16">
                                 <padding>
                                     <Insets top="20" right="24"
@@ -162,12 +211,10 @@
                                 <Label text="ADDRESS"
                                        styleClass="field-label"/>
                                 <TextArea fx:id="fieldAddress"
-                                          promptText="e.g. 12 Moshoeshoe Rd, Maseru"
+                                          promptText="e.g. 12 Moshoeshoe Rd"
                                           styleClass="form-field"
                                           prefHeight="80"
                                           wrapText="true"/>
-
-                                <Region prefHeight="10"/>
 
                                 <Button fx:id="customerSaveBtn"
                                         text="SAVE CUSTOMER"
@@ -179,28 +226,42 @@
                                        text=""
                                        styleClass="success-label"
                                        wrapText="true"/>
-
                             </VBox>
-                        </ScrollPane>
 
+                            <!-- CUSTOMER VEHICLE CARDS
+                                 (shown only for customer role) -->
+                            <VBox fx:id="myVehiclesPanel"
+                                  styleClass="panel-card"
+                                  spacing="16"
+                                  visible="false"
+                                  managed="false">
+                                <padding>
+                                    <Insets top="20" right="24"
+                                            bottom="20" left="24"/>
+                                </padding>
+                                <Label text="MY VEHICLES"
+                                       styleClass="section-title"/>
+                                <Label text="Vehicles registered under your name"
+                                       styleClass="page-subtitle"/>
+                                <VBox fx:id="myVehiclesList"
+                                      spacing="12"/>
+                            </VBox>
+
+                        </ScrollPane>
                     </SplitPane>
                 </Tab>
 
-                <!-- ══════════════════════════
-                     TAB 2 — QUERIES
-                ══════════════════════════ -->
-                <Tab text="💬  Vehicle Queries" closable="false">
+                <!-- ══ TAB 2 — QUERIES ══ -->
+                <Tab text="Queries" closable="false">
                     <SplitPane dividerPositions="0.62"
                                styleClass="split-pane">
 
-                        <!-- LEFT: Queries Table -->
                         <VBox styleClass="panel-card" spacing="14">
                             <padding>
                                 <Insets top="20" right="20"
                                         bottom="20" left="20"/>
                             </padding>
 
-                            <!-- Filter row -->
                             <HBox spacing="12"
                                   alignment="CENTER_LEFT">
                                 <ComboBox fx:id="queryCustomerFilter"
@@ -216,7 +277,6 @@
                                         onAction="#handleClearQuery"/>
                             </HBox>
 
-                            <!-- Queries table with pagination -->
                             <TableView fx:id="queryTable"
                                        styleClass="table-view"
                                        VBox.vgrow="ALWAYS"
@@ -234,7 +294,7 @@
                                                  text="Query"/>
                                 </columns>
                                 <placeholder>
-                                    <Label text="No queries found"
+                                    <Label text="No queries yet"
                                            style="-fx-text-fill: #555577;"/>
                                 </placeholder>
                             </TableView>
@@ -244,7 +304,8 @@
                                         styleClass="pagination"/>
 
                             <HBox spacing="10">
-                                <Button text="🗑 Delete Selected"
+                                <Button fx:id="deleteQueryBtn"
+                                        text="Delete"
                                         styleClass="btn-danger"
                                         onAction="#handleDeleteQuery"/>
                                 <Region HBox.hgrow="ALWAYS"/>
@@ -254,7 +315,6 @@
                             </HBox>
                         </VBox>
 
-                        <!-- RIGHT: Query Form + Response -->
                         <ScrollPane styleClass="scroll-pane"
                                     fitToWidth="true">
                             <VBox styleClass="panel-card"
@@ -265,8 +325,11 @@
                                 </padding>
 
                                 <Label fx:id="queryFormTitle"
-                                       text="New Query"
+                                       text="File a Query"
                                        styleClass="section-title"/>
+                                <Label text="Ask about your vehicle's condition or status"
+                                       styleClass="page-subtitle"
+                                       wrapText="true"/>
 
                                 <Label text="CUSTOMER"
                                        styleClass="field-label"/>
@@ -282,52 +345,133 @@
                                           styleClass="form-combo"
                                           maxWidth="Infinity"/>
 
-                                <Label text="QUERY DATE"
+                                <Label text="DATE"
                                        styleClass="field-label"/>
                                 <DatePicker fx:id="queryDatePicker"
                                             styleClass="form-date"
                                             maxWidth="Infinity"/>
 
-                                <Label text="QUERY"
+                                <Label text="YOUR QUERY"
                                        styleClass="field-label"/>
                                 <TextArea fx:id="queryTextField"
-                                          promptText="Describe the query or concern..."
+                                          promptText="Describe your question or concern..."
                                           styleClass="form-field"
                                           prefHeight="100"
                                           wrapText="true"/>
 
-                                <Label text="RESPONSE"
-                                       styleClass="field-label"/>
-                                <TextArea fx:id="responseTextField"
-                                          promptText="Enter response here..."
-                                          styleClass="form-field"
-                                          prefHeight="100"
-                                          wrapText="true"/>
-
-                                <Region prefHeight="8"/>
+                                <!-- Response area — shown when
+                                     admin responds -->
+                                <VBox fx:id="responseArea"
+                                      spacing="8">
+                                    <Label text="RESPONSE FROM SYSTEM"
+                                           styleClass="field-label"/>
+                                    <TextArea fx:id="responseTextField"
+                                              promptText="Response will appear here..."
+                                              styleClass="form-field"
+                                              prefHeight="80"
+                                              wrapText="true"/>
+                                </VBox>
 
                                 <HBox spacing="10">
-                                    <Button text="SAVE QUERY"
+                                    <Button fx:id="saveQueryBtn"
+                                            text="SUBMIT QUERY"
                                             styleClass="btn-primary"
                                             HBox.hgrow="ALWAYS"
                                             maxWidth="Infinity"
                                             onAction="#handleSaveQuery"/>
-                                    <Button text="RESPOND"
+                                    <Button fx:id="respondBtn"
+                                            text="RESPOND"
                                             styleClass="btn-secondary"
                                             HBox.hgrow="ALWAYS"
                                             maxWidth="Infinity"
-                                            onAction="#handleRespondQuery"/>
+                                            onAction="#handleRespondQuery"
+                                            visible="false"
+                                            managed="false"/>
                                 </HBox>
 
                                 <Label fx:id="queryFormStatus"
                                        text=""
                                        styleClass="success-label"
                                        wrapText="true"/>
-
                             </VBox>
                         </ScrollPane>
-
                     </SplitPane>
+                </Tab>
+
+                <!-- ══ TAB 3 — MY SERVICES (Customer only) ══ -->
+                <Tab fx:id="myServicesTab"
+                     text="🔧  My Services"
+                     closable="false"
+                     >
+                    <VBox styleClass="panel-card" spacing="14">
+                        <padding>
+                            <Insets top="20" right="20"
+                                    bottom="20" left="20"/>
+                        </padding>
+                        <Label text="MY SERVICE HISTORY"
+                               styleClass="section-title"/>
+                        <Label text="All services performed on your vehicles"
+                               styleClass="page-subtitle"/>
+                        <TableView fx:id="myServicesTable"
+                                   styleClass="table-view"
+                                   VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colSVehicle"
+                                             text="Vehicle"/>
+                                <TableColumn fx:id="colSDate"
+                                             text="Date"/>
+                                <TableColumn fx:id="colSType"
+                                             text="Service Type"/>
+                                <TableColumn fx:id="colSDesc"
+                                             text="Description"/>
+                                <TableColumn fx:id="colSCost"
+                                             text="Cost (M)"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No service records yet"
+                                       style="-fx-text-fill: #555577;"/>
+                            </placeholder>
+                        </TableView>
+                    </VBox>
+                </Tab>
+
+                <!-- ══ TAB 4 — MY INSURANCE (Customer only) ══ -->
+                <Tab fx:id="myInsuranceTab"
+                     text="My Insurance"
+                     closable="false"
+                     >
+                    <VBox styleClass="panel-card" spacing="14">
+                        <padding>
+                            <Insets top="20" right="20"
+                                    bottom="20" left="20"/>
+                        </padding>
+                        <Label text="MY INSURANCE POLICIES"
+                               styleClass="section-title"/>
+                        <Label text="Active and past insurance coverage"
+                               styleClass="page-subtitle"/>
+                        <TableView fx:id="myInsuranceTable"
+                                   styleClass="table-view"
+                                   VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colIVehicle"
+                                             text="Vehicle"/>
+                                <TableColumn fx:id="colIProvider"
+                                             text="Provider"/>
+                                <TableColumn fx:id="colIPolicy"
+                                             text="Policy No."/>
+                                <TableColumn fx:id="colIStart"
+                                             text="Start"/>
+                                <TableColumn fx:id="colIEnd"
+                                             text="Expiry"/>
+                                <TableColumn fx:id="colIStatus"
+                                             text="Status"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No insurance policies found"
+                                       style="-fx-text-fill: #555577;"/>
+                            </placeholder>
+                        </TableView>
+                    </VBox>
                 </Tab>
 
             </TabPane>

@@ -38,7 +38,7 @@ public class MainApp extends Application {
         Image icon= new Image(image.openStream());
         stage.getIcons().add(icon);
 
-        stage.setTitle("Vehicle Identification System");
+        stage.setTitle("NVis");
         stage.setScene(scene);
         stage.setMaximized(true);      // ← Opens fullscreen
         stage.setMinWidth(1000);

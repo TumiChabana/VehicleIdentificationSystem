@@ -88,7 +88,7 @@ public class LandingController implements Initializable {
             fade.setToValue(0.0);
             fade.setOnFinished(e -> {
                 stage.setScene(scene);
-                stage.setMaximized(true);
+                BaseModuleController.applyStageDefaults(stage);
 
                 // Fade in new scene
                 FadeTransition fadeIn = new FadeTransition(

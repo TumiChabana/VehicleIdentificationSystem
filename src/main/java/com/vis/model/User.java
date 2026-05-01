@@ -6,6 +6,8 @@ public class User {
     private String username;
     private String passwordHash;
     private String role;
+    private int customerId;      // links to customer table
+    private String identifier;
 
     public User() {}
 
@@ -28,4 +30,12 @@ public class User {
 
     public String getRole() { return role; }
     public void setRole(String r) { this.role = r; }
+
+    public int getCustomerId() { return customerId; }
+    public void setCustomerId(int c) { this.customerId = c; }
+
+    public String getIdentifier() { return identifier; }
+    public void setIdentifier(String i) {
+        this.identifier = i;
+    }
 }

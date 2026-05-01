@@ -10,6 +10,7 @@ public class Vehicle {
     private String color;
     private int ownerId;
     private String ownerName;
+    private String imagePath;
 
 
     public Vehicle(int vehicleId, String registrationNumber, String make,
@@ -59,6 +60,13 @@ public class Vehicle {
     public String toString() {
         return year + " " + make + " " + model
                 + " [" + registrationNumber + "]";
+    }
+
+      // absolute path to stored image
+
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
 

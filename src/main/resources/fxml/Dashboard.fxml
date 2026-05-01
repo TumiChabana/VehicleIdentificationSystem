@@ -4,12 +4,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.vis.controller.DashboardController"
-            styleClass="root-pane"
-            stylesheets="@../styles/dashboard.css">
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.vis.controller.DashboardController"
+           styleClass="root-pane"
+           stylesheets="@../styles/dashboard.css">
+
+    <BorderPane styleClass="root-pane">
     <!-- ═══ TOP — MenuBar + Header ═══ -->
     <top>
         <VBox>
@@ -24,13 +28,13 @@
                               onAction="#handleExit"/>
                 </Menu>
                 <Menu text="Modules">
-                    <MenuItem text="🔧  Workshop"
+                    <MenuItem text="Workshop"
                               onAction="#openWorkshop"/>
-                    <MenuItem text="👤  Customer"
+                    <MenuItem text="Customer"
                               onAction="#openCustomer"/>
-                    <MenuItem text="🚔  Police"
+                    <MenuItem text="Police"
                               onAction="#openPolice"/>
-                    <MenuItem text="🛡  Insurance"
+                    <MenuItem text="Insurance"
                               onAction="#openInsurance"/>
                 </Menu>
                 <Menu text="Reports">
@@ -52,16 +56,22 @@
             <!-- Header Bar -->
             <HBox styleClass="top-header"
                   alignment="CENTER_LEFT" spacing="20">
-
+            <HBox spacing="9">
                 <!-- Logo + Title -->
-                <Label text="VIS" styleClass="header-logo"/>
+                <ImageView fitHeight="40" fitWidth="40"
+                           pickOnBounds="true" preserveRatio="true" >
+                    <image>
+                        <Image url="/images/logo3.png"/>
+                    </image>
+                </ImageView>
                 <VBox>
-                    <Label text="VEHICLE IDENTIFICATION SYSTEM"
+                    <Label text="NVis"
                            styleClass="header-title"/>
                     <Label fx:id="welcomeLabel"
                            text="Welcome"
                            styleClass="header-sub"/>
                 </VBox>
+            </HBox>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
@@ -97,6 +107,7 @@
                 </VBox>
 
                 <!-- Logout -->
+
                 <Button text="Logout"
                         styleClass="btn-danger"
                         onAction="#handleLogout"/>
@@ -280,4 +291,79 @@
         </ScrollPane>
     </center>
 
-</BorderPane>
+    </BorderPane>
+
+    <!-- ═══ VEHICLE DETAIL OVERLAY ═══ -->
+    <StackPane fx:id="overlayPane"
+               visible="false"
+               mouseTransparent="false"
+               pickOnBounds="false"
+               style="-fx-background-color: transparent;">
+
+        <!-- Semi-transparent full-screen dimmer -->
+        <Region style="-fx-background-color: rgba(5,5,18,0.55);"
+                pickOnBounds="false"/>
+
+        <!-- Card anchored to top-right -->
+        <VBox fx:id="vehicleDetailCard"
+              styleClass="vehicle-detail-card"
+              prefWidth="340"
+              maxWidth="340"
+              spacing="0"
+              StackPane.alignment="TOP_RIGHT">
+
+            <!-- Image sits at the very top, fixed height -->
+            <ImageView fx:id="overlayCarImage"
+                       fitWidth="340"
+                       fitHeight="210"
+                       preserveRatio="false"
+                       smooth="true"
+                       managed="true"
+                       visible="true">
+                <VBox.margin>
+                    <Insets top="0" right="0" bottom="0" left="0"/>
+                </VBox.margin>
+            </ImageView>
+
+            <VBox styleClass="detail-card-body" spacing="10">
+                <padding>
+                    <Insets top="18" right="20" bottom="22" left="20"/>
+                </padding>
+
+                <Label text="VEHICLE DETAILS"
+                       styleClass="detail-card-title"/>
+
+                <HBox styleClass="detail-row" spacing="8">
+                    <Label text="REG"    styleClass="detail-key"/>
+                    <Label fx:id="overlayReg"   styleClass="detail-value"/>
+                </HBox>
+                <HBox styleClass="detail-row" spacing="8">
+                    <Label text="MAKE"   styleClass="detail-key"/>
+                    <Label fx:id="overlayMake"  styleClass="detail-value"/>
+                </HBox>
+                <HBox styleClass="detail-row" spacing="8">
+                    <Label text="MODEL"  styleClass="detail-key"/>
+                    <Label fx:id="overlayModel" styleClass="detail-value"/>
+                </HBox>
+                <HBox styleClass="detail-row" spacing="8">
+                    <Label text="YEAR"   styleClass="detail-key"/>
+                    <Label fx:id="overlayYear"  styleClass="detail-value"/>
+                </HBox>
+                <HBox styleClass="detail-row" spacing="8">
+                    <Label text="COLOR"  styleClass="detail-key"/>
+                    <Label fx:id="overlayColor" styleClass="detail-value"/>
+                </HBox>
+                <HBox styleClass="detail-row" spacing="8">
+                    <Label text="OWNER"  styleClass="detail-key"/>
+                    <Label fx:id="overlayOwner" styleClass="detail-value"/>
+                </HBox>
+
+                <Button text="CLOSE"
+                        styleClass="btn-danger"
+                        onAction="#hideVehicleOverlay"
+                        maxWidth="Infinity"/>
+            </VBox>
+        </VBox>
+
+    </StackPane>
+</StackPane>

@@ -110,4 +110,37 @@ public class ServiceRecordDAO {
         sr.setVehicleReg(rs.getString("reg"));
         return sr;
     }
+
+    // Get service records for vehicles owned by a customer
+    public List<ServiceRecord> getServicesByCustomerId(
+            int customerId) {
+        List<ServiceRecord> list = new ArrayList<>();
+        String sql = """
+        SELECT sr.*, v.registration_number as reg
+        FROM service_record sr
+        JOIN vehicle v ON sr.vehicle_id = v.vehicle_id
+        WHERE v.owner_id = ?
+        ORDER BY sr.service_date DESC
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                ServiceRecord sr = new ServiceRecord(
+                        rs.getInt("service_id"),
+                        rs.getInt("vehicle_id"),
+                        rs.getDate("service_date").toLocalDate(),
+                        rs.getString("service_type"),
+                        rs.getString("description"),
+                        rs.getDouble("cost")
+                );
+                sr.setVehicleReg(rs.getString("reg"));
+                list.add(sr);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+        return list;
+    }
 }

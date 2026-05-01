@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -29,6 +30,18 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.shape.Rectangle;
+import java.io.File;
+import javafx.animation.ScaleTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
 
 public class DashboardController implements Initializable {
 
@@ -52,6 +65,17 @@ public class DashboardController implements Initializable {
     @FXML private TableColumn<Vehicle, String> colColor;
     @FXML private TableColumn<Vehicle, String> colOwner;
 
+    // ── VEHICLE HOVER OVERLAY ─────────────────────
+    @FXML private StackPane overlayPane;       // injected from FXML
+    @FXML private VBox vehicleDetailCard;
+    @FXML private ImageView overlayCarImage;
+    @FXML private Label overlayReg;
+    @FXML private Label overlayMake;
+    @FXML private Label overlayModel;
+    @FXML private Label overlayYear;
+    @FXML private Label overlayColor;
+    @FXML private Label overlayOwner;
+
     // ── VIOLATIONS TABLE + PAGINATION ────────────
     @FXML private TableView<Violation> violationTable;
     @FXML private TableColumn<Violation, String> colViolationType;
@@ -74,6 +98,7 @@ public class DashboardController implements Initializable {
     private User currentUser;
     private List<Violation> allViolations;
     private static final int VIOLATIONS_PER_PAGE = 5;
+    private Vehicle currentOverlayVehicle = null;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -122,7 +147,7 @@ public class DashboardController implements Initializable {
 
 
 
-        // ⚠️ Owner column — we'll populate this from
+        // ⚠Owner column — we'll populate this from
         // pre-loaded data, not per-row DB calls
         colOwner.setCellValueFactory(d ->
                 new SimpleStringProperty(
@@ -157,6 +182,127 @@ public class DashboardController implements Initializable {
                 }
             }
         });
+
+        vehicleTable.setRowFactory(tv -> {
+            TableRow<Vehicle> row = new TableRow<>();
+            row.setOnMouseClicked(e -> {
+                if (!row.isEmpty() && row.getItem() != null) {
+                    if (overlayPane.isVisible()
+                            && row.getItem().equals(currentOverlayVehicle)) {
+                        // Clicking the same row again closes it
+                        hideVehicleOverlay();
+                    } else {
+                        showVehicleOverlay(row.getItem());
+                    }
+                }
+            });
+            return row;
+        });
+
+
+// Hide overlay when mouse leaves it
+// Wire this in FXML via onMouseExited="#hideVehicleOverlay"
+    }
+
+    // ── VEHICLE OVERLAY ───────────────────────────
+
+    private void showVehicleOverlay(Vehicle v) {
+        currentOverlayVehicle = v;
+
+        // Populate text
+        overlayReg.setText(v.getRegistrationNumber());
+        overlayMake.setText(v.getMake());
+        overlayModel.setText(v.getModel());
+        overlayYear.setText(String.valueOf(v.getYear()));
+        overlayColor.setText(v.getColor());
+        overlayOwner.setText(v.getOwnerName() != null
+                ? v.getOwnerName() : "—");
+
+        // Load image safely
+        Image img = null;
+        String path = v.getImagePath();
+        if (path != null && !path.isBlank()) {
+            File f = new File(path);
+            if (f.exists()) {
+                try {
+                    img = new Image("file:" + path,
+                            340, 210, false, true);
+                } catch (Exception ignored) {}
+            }
+        }
+
+        if (img == null) {
+            try {
+                var stream = getClass()
+                        .getResourceAsStream("/images/logo3.png");
+                if (stream != null) {
+                    img = new Image(stream, 340, 210, false, true);
+                }
+            } catch (Exception ignored) {}
+        }
+
+        overlayCarImage.setManaged(true);
+        overlayCarImage.setVisible(true);
+        overlayCarImage.setFitWidth(340);
+        overlayCarImage.setFitHeight(210);
+        overlayCarImage.setPreserveRatio(false);
+
+        if (img != null) {
+            overlayCarImage.setImage(img);
+        } else {
+            overlayCarImage.setVisible(false);
+            overlayCarImage.setManaged(false);
+        }
+
+        // If already visible, just swap content — no re-animation
+        if (overlayPane.isVisible()) return;
+
+        // Animate in from the right
+        overlayPane.setVisible(true);
+        overlayPane.setManaged(false);
+        overlayPane.setOpacity(0);
+
+        // Slide card in from right
+        vehicleDetailCard.setTranslateX(60);
+
+        FadeTransition fade = new FadeTransition(
+                Duration.millis(260), overlayPane);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+        fade.setInterpolator(Interpolator.EASE_OUT);
+
+        TranslateTransition slide = new TranslateTransition(
+                Duration.millis(260), vehicleDetailCard);
+        slide.setFromX(60);
+        slide.setToX(0);
+        slide.setInterpolator(Interpolator.EASE_OUT);
+
+        new ParallelTransition(fade, slide).play();
+    }
+
+    @FXML
+    public void hideVehicleOverlay() {
+        if (!overlayPane.isVisible()) return;
+        currentOverlayVehicle = null;
+
+        FadeTransition fade = new FadeTransition(
+                Duration.millis(200), overlayPane);
+        fade.setFromValue(1);
+        fade.setToValue(0);
+        fade.setInterpolator(Interpolator.EASE_IN);
+
+        TranslateTransition slide = new TranslateTransition(
+                Duration.millis(200), vehicleDetailCard);
+        slide.setFromX(0);
+        slide.setToX(60);
+        slide.setInterpolator(Interpolator.EASE_IN);
+
+        ParallelTransition pt = new ParallelTransition(fade, slide);
+        pt.setOnFinished(e -> {
+            overlayPane.setVisible(false);
+            vehicleDetailCard.setTranslateX(0);
+        });
+        pt.play();
     }
 
     private void setupDropShadow() {
@@ -286,28 +432,28 @@ public class DashboardController implements Initializable {
     private void populateActivityList() {
         activityList.getChildren().clear();
         String[] activities = {
-                "🚗 Vehicle LSO-001-AA registered",
-                "🚔 Police report filed — Accident",
-                "🛡 Insurance policy LNI-2024-001 activated",
-                "⚠️ Violation recorded — Speeding",
-                "👤 Customer Litumeleng Mokoena added",
-                "🔧 Service record added — Oil Change",
-                "🚗 Vehicle LSO-002-BB registered",
-                "💰 Fine paid — LSO-001-AA",
-                "🚔 Theft report filed — LSO-004-DD",
-                "🛡 Policy ALI-2024-002 activated",
-                "👤 Customer Thabo Nkosi added",
-                "⚠️ Violation — Illegal Parking",
-                "🔧 Service — Full Service LSO-003-CC",
-                "🚗 Vehicle LSO-005-EE registered",
-                "🚔 Suspicious vehicle report filed",
-                "👤 Customer Palesa Lerato added",
-                "⚠️ Violation — Running Red Light",
-                "🛡 Policy MET-2023-003 expired",
-                "🔧 Service — Brake Service LSO-001-AA",
-                "🚗 Vehicle LSO-007-GG registered",
-                "👤 Customer Mpho Sithole added",
-                "💰 Fine paid — LSO-005-EE"
+                "Vehicle LSO-001-AA registered",
+                "Police report filed - Accident",
+                "Insurance policy LNI-2024-001 activated",
+                "Violation recorded - Speeding",
+                "Customer Litumeleng Mokoena added",
+                "Service record added - Oil Change",
+                "Vehicle LSO-002-BB registered",
+                "Fine paid — LSO-001-AA",
+                "Theft report filed - LSO-004-DD",
+                "Policy ALI-2024-002 activated",
+                "Customer Thabo Nkosi added",
+                "Violation - Illegal Parking",
+                "Service - Full Service LSO-003-CC",
+                "Vehicle LSO-005-EE registered",
+                "Suspicious vehicle report filed",
+                "Customer Palesa Lerato added",
+                "Violation - Running Red Light",
+                "Policy MET-2023-003 expired",
+                "Service - Brake Service LSO-001-AA",
+                "Vehicle LSO-007-GG registered",
+                "Customer Mpho Sithole added",
+                "Fine paid - LSO-005-EE"
         };
 
         for (int i = 0; i < activities.length; i++) {
@@ -361,7 +507,7 @@ public class DashboardController implements Initializable {
             Stage stage = (Stage) welcomeLabel
                     .getScene().getWindow();
             stage.setScene(scene);
-            stage.setMaximized(true);
+            BaseModuleController.applyStageDefaults(stage);
         } catch (Exception e) {
             System.err.println("Logout error: " + e.getMessage());
         }
@@ -402,21 +548,27 @@ public class DashboardController implements Initializable {
                     .getScene().getWindow();
 
             // Smooth fade transition between screens
-            FadeTransition fade = new FadeTransition(
-                    Duration.millis(300),
+            FadeTransition fadeOut = new FadeTransition(
+                    Duration.millis(250),
                     stage.getScene().getRoot());
-            fade.setFromValue(1.0);
-            fade.setToValue(0.0);
-            fade.setOnFinished(e -> {
+            fadeOut.setFromValue(1.0);
+            fadeOut.setToValue(0.0);
+            fadeOut.setOnFinished(e -> {
                 stage.setScene(scene);
-                stage.setMaximized(true);
-                FadeTransition fadeIn = new FadeTransition(
-                        Duration.millis(300), scene.getRoot());
-                fadeIn.setFromValue(0.0);
-                fadeIn.setToValue(1.0);
-                fadeIn.play();
+                stage.setMaximized(false);
+                stage.setMinWidth(1000);
+                stage.setMinHeight(650);
+
+                Platform.runLater(() -> {
+                    stage.setMaximized(true);
+                    FadeTransition fadeIn = new FadeTransition(
+                            Duration.millis(250), scene.getRoot());
+                    fadeIn.setFromValue(0.0);
+                    fadeIn.setToValue(1.0);
+                    fadeIn.play();
+                });
             });
-            fade.play();
+            fadeOut.play();
 
         } catch (Exception e) {
             System.err.println("Navigation error: "
@@ -433,6 +585,7 @@ public class DashboardController implements Initializable {
             scene.getStylesheets().add(page.toExternalForm());
     }
 
+
     // ── INNER CLASS — bundles all loaded data ─────
     // Keeps the Task clean and type-safe
 
@@ -442,4 +595,6 @@ public class DashboardController implements Initializable {
         List<Violation>       violations;
         List<InsuranceRecord> insurance;
     }
+
+
 }

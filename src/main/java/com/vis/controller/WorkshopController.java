@@ -17,10 +17,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.animation.FadeTransition;
 
+import java.io.File;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
@@ -69,6 +73,15 @@ public class WorkshopController
     @FXML private Label serviceStatusLabel;
     @FXML private Label serviceFormStatus;
 
+    @FXML private TextField imagePathField;
+    @FXML private ImageView imagePreview;
+
+    @FXML private Label moduleTitleLabel;
+    @FXML private Label moduleSubLabel;
+    @FXML private Button dashboardBtn;
+    @FXML private Button deleteVehicleBtn;
+    @FXML private MenuBar workshopMenuBar;
+
     // ── DAOs ─────────────────────────────────────
     private final VehicleDAO vehicleDAO           = new VehicleDAO();
     private final CustomerDAO customerDAO         = new CustomerDAO();
@@ -85,9 +98,17 @@ public class WorkshopController
         setupServiceTypeOptions();
     }
 
+
+
     @Override
     protected void onUserLoaded() {
         userLabel.setText(currentUser.getRole());
+        boolean isAdmin = "ADMIN".equals(currentUser.getRole());
+        dashboardBtn.setVisible(
+                "ADMIN".equals(currentUser.getRole()));
+        dashboardBtn.setManaged(
+                "ADMIN".equals(currentUser.getRole()));
+        setupForRole();
         loadAllDataAsync();
     }
 
@@ -97,36 +118,59 @@ public class WorkshopController
         Task<Void> task = new Task<>() {
             @Override
             protected Void call() {
-                allVehicles =
-                        vehicleDAO.getAllVehiclesWithOwners();
+                String role = currentUser.getRole();
+
+                // ADMIN sees everything
+                // WORKSHOP sees everything (they service all)
+                // CUSTOMER sees only their own vehicles
+                if ("CUSTOMER".equals(role)) {
+                    allVehicles = customerDAO
+                            .getVehiclesByCustomerId(
+                                    currentUser.getCustomerId());
+                } else {
+                    allVehicles =
+                            vehicleDAO.getAllVehiclesWithOwners();
+                }
+
                 List<Customer> customers =
                         customerDAO.getAllCustomers();
-                List<ServiceRecord> records =
-                        serviceDAO.getAllServiceRecords();
+
+                List<ServiceRecord> records;
+                if ("CUSTOMER".equals(role)) {
+                    records = serviceDAO.getServicesByCustomerId(
+                            currentUser.getCustomerId());
+                } else {
+                    records = serviceDAO.getAllServiceRecords();
+                }
+
+                List<Customer> finalCustomers = customers;
+                List<ServiceRecord> finalRecords = records;
 
                 Platform.runLater(() -> {
-                    // Populate vehicle table
                     vehicleTable.setItems(
                             FXCollections.observableArrayList(
                                     allVehicles));
 
-                    // Populate owner combo
-                    ownerComboBox.setItems(
-                            FXCollections.observableArrayList(
-                                    customers));
+                    // Customers only for non-customer roles
+                    if (!"CUSTOMER".equals(role)) {
+                        ownerComboBox.setItems(
+                                FXCollections.observableArrayList(
+                                        finalCustomers));
+                    }
 
-                    // Populate vehicle filters
                     serviceVehicleCombo.setItems(
                             FXCollections.observableArrayList(
                                     allVehicles));
                     serviceVehicleFilter.setItems(
                             FXCollections.observableArrayList(
                                     allVehicles));
-
-                    // Populate service table
                     serviceTable.setItems(
                             FXCollections.observableArrayList(
-                                    records));
+                                    finalRecords));
+
+                    // Hide add/edit/delete for customers
+                    // (read-only view)
+                    applyRoleRestrictions();
                 });
                 return null;
             }
@@ -134,6 +178,17 @@ public class WorkshopController
         Thread t = new Thread(task);
         t.setDaemon(true);
         t.start();
+    }
+
+    private void applyRoleRestrictions() {
+        boolean isCustomer =
+                "CUSTOMER".equals(currentUser.getRole());
+
+        // Customer gets read-only workshop view
+        vehicleSaveBtn.setVisible(!isCustomer);
+        vehicleSaveBtn.setManaged(!isCustomer);
+        vehicleFormTitle.setText(isCustomer
+                ? "Your Vehicles" : "Add New Vehicle");
     }
 
     // ── TABLE COLUMN SETUP ────────────────────────
@@ -233,7 +288,7 @@ public class WorkshopController
                 .getSelectedItem();
         if (v == null) {
             showStatus(vehicleStatusLabel,
-                    "⚠ Please select a vehicle to edit.", false);
+                    "Please select a vehicle to edit.", false);
             return;
         }
         isEditMode = true;
@@ -257,7 +312,7 @@ public class WorkshopController
                 || fieldModel.getText().isEmpty()
                 || fieldYear.getText().isEmpty()) {
             showStatus(vehicleFormStatus,
-                    "⚠ Please fill in all required fields.", false);
+                    "Please fill in all required fields.", false);
             return;
         }
 
@@ -271,10 +326,18 @@ public class WorkshopController
                     fieldYear.getText().trim()));
             v.setColor(fieldColor.getText().trim());
 
+
             Customer owner = ownerComboBox.getValue();
             if (owner != null) {
                 v.setOwnerId(owner.getId());
             }
+
+            // Save image path if one was selected
+            if (imagePathField.getText() != null
+                    && !imagePathField.getText().isBlank()) {
+                v.setImagePath(imagePathField.getText());
+            }
+
 
             boolean success;
             if (isEditMode && selectedVehicle != null) {
@@ -286,18 +349,20 @@ public class WorkshopController
 
             if (success) {
                 showStatus(vehicleFormStatus,
-                        "✅ Vehicle saved successfully.", true);
+                        "Vehicle saved successfully.", true);
                 clearVehicleForm();
                 loadAllDataAsync();
             } else {
                 showStatus(vehicleFormStatus,
-                        "❌ Failed to save vehicle.", false);
+                        "Failed to save vehicle.", false);
             }
 
         } catch (NumberFormatException e) {
             showStatus(vehicleFormStatus,
-                    "⚠ Year must be a number.", false);
+                    "Year must be a number.", false);
         }
+
+
     }
 
     @FXML
@@ -306,7 +371,7 @@ public class WorkshopController
                 .getSelectedItem();
         if (v == null) {
             showStatus(vehicleStatusLabel,
-                    "⚠ Please select a vehicle to delete.", false);
+                    "Please select a vehicle to delete.", false);
             return;
         }
 
@@ -324,11 +389,11 @@ public class WorkshopController
                         v.getVehicleId());
                 if (success) {
                     showStatus(vehicleStatusLabel,
-                            "✅ Vehicle deleted.", true);
+                            "Vehicle deleted.", true);
                     loadAllDataAsync();
                 } else {
                     showStatus(vehicleStatusLabel,
-                            "❌ Delete failed.", false);
+                            "Delete failed.", false);
                 }
             }
         });
@@ -380,7 +445,7 @@ public class WorkshopController
                 || serviceTypeCombo.getValue() == null
                 || serviceCostField.getText().isEmpty()) {
             showStatus(serviceFormStatus,
-                    "⚠ Please fill in all required fields.", false);
+                    "Please fill in all required fields.", false);
             return;
         }
 
@@ -397,17 +462,17 @@ public class WorkshopController
             boolean success = serviceDAO.addServiceRecord(sr);
             if (success) {
                 showStatus(serviceFormStatus,
-                        "✅ Service record saved.", true);
+                        "Service record saved.", true);
                 handleAddService(); // reset form
                 loadAllDataAsync();
             } else {
                 showStatus(serviceFormStatus,
-                        "❌ Failed to save record.", false);
+                        "Failed to save record.", false);
             }
 
         } catch (NumberFormatException e) {
             showStatus(serviceFormStatus,
-                    "⚠ Cost must be a number.", false);
+                    "Cost must be a number.", false);
         }
     }
 
@@ -417,18 +482,18 @@ public class WorkshopController
                 .getSelectedItem();
         if (sr == null) {
             showStatus(serviceStatusLabel,
-                    "⚠ Please select a record to delete.", false);
+                    "Please select a record to delete.", false);
             return;
         }
         boolean success = serviceDAO.deleteServiceRecord(
                 sr.getRecordId());
         if (success) {
             showStatus(serviceStatusLabel,
-                    "✅ Record deleted.", true);
+                    "Record deleted.", true);
             loadAllDataAsync();
         } else {
             showStatus(serviceStatusLabel,
-                    "❌ Delete failed.", false);
+                    "Delete failed.", false);
         }
     }
 
@@ -480,7 +545,7 @@ public class WorkshopController
             applyStyles(scene, "/styles/login.css");
             Stage stage = (Stage) userLabel.getScene().getWindow();
             stage.setScene(scene);
-            stage.setMaximized(true);
+            BaseModuleController.applyStageDefaults(stage);
         } catch (Exception e) {
             System.err.println("Logout error: " + e.getMessage());
         }
@@ -530,6 +595,8 @@ public class WorkshopController
         ).play();
     }
 
+
+
     private void applyStyles(Scene scene, String pageCSS) {
         java.net.URL base =
                 getClass().getResource("/styles/base.css");
@@ -540,4 +607,65 @@ public class WorkshopController
         if (page != null)
             scene.getStylesheets().add(page.toExternalForm());
     }
+
+
+
+    @FXML
+    private void handleImageBrowse() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Select Vehicle Image");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter(
+                        "Images", "*.png", "*.jpg", "*.jpeg", "*.webp"));
+
+        File file = chooser.showOpenDialog(
+                imagePathField.getScene().getWindow());
+
+        if (file != null) {
+            imagePathField.setText(file.getAbsolutePath());
+            Image preview = new Image("file:" + file.getAbsolutePath(),
+                    240, 140, true, true);
+            imagePreview.setImage(preview);
+            imagePreview.setVisible(true);
+        }
+    }
+
+    private void setupForRole() {
+        boolean isAdmin =
+                "ADMIN".equals(currentUser.getRole());
+        boolean isWorkshop =
+                "WORKSHOP".equals(currentUser.getRole());
+
+        // Dashboard button — admin only
+        dashboardBtn.setVisible(isAdmin);
+        dashboardBtn.setManaged(isAdmin);
+
+        applyRoleBasedMenuBar(workshopMenuBar);
+
+        if (isWorkshop) {
+            // Personalize header
+            moduleTitleLabel.setText("WORKSHOP DASHBOARD");
+            moduleSubLabel.setText(
+                    "Manage vehicle services and registrations");
+
+            // Workshop staff cannot delete vehicles
+            // — that is an admin action
+            deleteVehicleBtn.setVisible(false);
+            deleteVehicleBtn.setManaged(false);
+
+            // But they CAN add vehicles and service records
+            // All their core work is still available
+        }
+
+        if (isAdmin) {
+            moduleTitleLabel.setText("WORKSHOP MODULE");
+            moduleSubLabel.setText(
+                    "Vehicle Registration & Service Records");
+
+            // Admin sees everything including delete
+            deleteVehicleBtn.setVisible(true);
+            deleteVehicleBtn.setManaged(true);
+        }
+    }
+
 }

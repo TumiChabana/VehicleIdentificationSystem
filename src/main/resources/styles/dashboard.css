@@ -60,6 +60,10 @@
     -fx-padding: 16;
 }
 
+.progress-label{
+-fx-text-fill: #555577;
+}
+
 .activity-item {
     -fx-background-color: #1a1a35;
     -fx-background-radius: 8;
@@ -74,4 +78,80 @@
 .activity-time {
     -fx-text-fill: #555577;
     -fx-font-size: 11px;
+}
+
+/* Role info card in Admin module */
+.role-info-card {
+    -fx-background-color: #1a1a35;
+    -fx-background-radius: 10;
+    -fx-border-color: #2a2a4a;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 16;
+}
+
+.role-desc {
+    -fx-text-fill: #8888aa;
+    -fx-font-size: 12px;
+}
+
+.panel-card {
+    -fx-background-color: #12122a;
+    -fx-background-radius: 14;
+    -fx-border-color: #2a2a4a;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+}
+
+.split-pane {
+    -fx-background-color: #0d0d1a;
+    -fx-padding: 20;
+}
+
+.split-pane .split-pane-divider {
+    -fx-background-color: #2a2a4a;
+    -fx-padding: 0 1 0 1;
+}
+
+/* =============================================
+   VEHICLE DETAIL OVERLAY
+   ============================================= */
+
+.vehicle-detail-card {
+    -fx-background-color: #12122e;
+    -fx-border-color: #2e1a4a;
+    -fx-border-width: 0 0 1 1;
+    -fx-effect: dropshadow(gaussian, #000000cc, 36, 0.55, -4, 2);
+
+}
+
+.detail-card-body {
+    -fx-background-color: #12122e;
+}
+
+.detail-card-title {
+    -fx-text-fill: #e63946;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 6 0;
+}
+
+.detail-row {
+    -fx-background-color: #1c1c3a;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.detail-key {
+    -fx-text-fill: #555577;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-min-width: 54;
+}
+
+.detail-value {
+    -fx-text-fill: #e8e8ff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
 }
