@@ -34,4 +34,11 @@ public class PoliceReport extends VehicleRecord {
 
     public String getVehicleReg() { return vehicleReg; }
     public void setVehicleReg(String r) { this.vehicleReg = r; }
+
+    private int createdByUserId;
+
+    public int getCreatedByUserId() { return createdByUserId; }
+    public void setCreatedByUserId(int id) {
+        this.createdByUserId = id;
+    }
 }

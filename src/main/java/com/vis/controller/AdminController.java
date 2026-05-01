@@ -99,7 +99,9 @@ public class AdminController
                 new SimpleStringProperty(
                         d.getValue().getRole()));
         colCreated.setCellValueFactory(d ->
-                new SimpleStringProperty("—"));
+                new SimpleStringProperty(
+                        d.getValue().getCreatedAt() != null
+                                ? d.getValue().getCreatedAt() : "—"));
 
         // Color code roles
         colRole.setCellFactory(col -> new TableCell<>() {

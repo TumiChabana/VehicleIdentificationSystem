@@ -49,4 +49,10 @@ public class Violation {
     public String getVehicleReg() {
         return vehicleReg;
     }
+    private int createdByUserId;
+
+    public int getCreatedByUserId() { return createdByUserId; }
+    public void setCreatedByUserId(int id) {
+        this.createdByUserId = id;
+    }
 }

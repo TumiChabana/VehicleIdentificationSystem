@@ -4,6 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.*?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.AdminController"
@@ -30,18 +32,32 @@
 
             <HBox styleClass="top-header"
                   alignment="CENTER_LEFT" spacing="20">
-                <Label text="VIS" styleClass="header-logo"/>
-                <VBox>
-                    <Label text="ADMIN MODULE"
-                           styleClass="header-title"/>
-                    <Label text="User Access Management"
-                           styleClass="header-sub"/>
-                </VBox>
+
+                <HBox spacing="9">
+                    <!-- Logo + Title -->
+                    <ImageView fitHeight="40" fitWidth="40"
+                               pickOnBounds="true" preserveRatio="true" >
+                        <image>
+                            <Image url="/images/logo3.png"/>
+                        </image>
+                    </ImageView>
+
+                    <VBox>
+                        <VBox>
+                            <Label text="ADMIN MODULE"
+                                   styleClass="header-title"/>
+                            <Label text="User Access Management"
+                                   styleClass="header-sub"/>
+                        </VBox>
+                    </VBox>
+
+                </HBox>
+
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="userLabel"
                        text="" styleClass="role-badge"/>
                 <Button fx:id="dashboardBtn"
-                        text="← Dashboard"
+                        text="Dashboard"
                         styleClass="btn-secondary"
                         onAction="#goToDashboard"/>
                 <Button text="Logout"
@@ -88,11 +104,11 @@
                 </TableView>
 
                 <HBox spacing="10">
-                    <Button text="🗑 Delete Selected"
+                    <Button text="Delete Selected"
                             styleClass="btn-danger"
                             onAction="#handleDeleteUser"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="↻ Refresh"
+                    <Button text="Refresh"
                             styleClass="btn-secondary"
                             onAction="#handleRefresh"/>
                 </HBox>
@@ -149,18 +165,18 @@
                           spacing="8">
                         <Label text="ROLE DESCRIPTIONS"
                                styleClass="field-label"/>
-                        <Label text="ADMIN — Full system access"
+                        <Label text="ADMIN :Full system access"
                                styleClass="role-desc"/>
-                        <Label text="WORKSHOP — Vehicle registration and service"
+                        <Label text="WORKSHOP : Vehicle registration and service"
                                styleClass="role-desc"
                                wrapText="true"/>
-                        <Label text="CUSTOMER — Own vehicle queries only"
+                        <Label text="CUSTOMER : Own vehicle queries only"
                                styleClass="role-desc"
                                wrapText="true"/>
-                        <Label text="POLICE — Reports and violations"
+                        <Label text="POLICE : Reports and violations"
                                styleClass="role-desc"
                                wrapText="true"/>
-                        <Label text="INSURANCE — Policy management"
+                        <Label text="INSURANCE : Policy management"
                                styleClass="role-desc"
                                wrapText="true"/>
                     </VBox>

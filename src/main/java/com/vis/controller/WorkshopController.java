@@ -1,9 +1,11 @@
 package com.vis.controller;
 
 import com.vis.dao.CustomerDAO;
+import com.vis.dao.CustomerQueryDAO;
 import com.vis.dao.VehicleDAO;
 import com.vis.dao.ServiceRecordDAO;
 import com.vis.model.Customer;
+import com.vis.model.CustomerQuery;
 import com.vis.model.ServiceRecord;
 import com.vis.model.Vehicle;
 import com.vis.util.DBConnection;
@@ -82,6 +84,18 @@ public class WorkshopController
     @FXML private Button deleteVehicleBtn;
     @FXML private MenuBar workshopMenuBar;
 
+    @FXML private TableView<CustomerQuery> workshopQueryTable;
+    @FXML private TableColumn<CustomerQuery, String> colQCustomer;
+    @FXML private TableColumn<CustomerQuery, String> colQVehicle;
+    @FXML private TableColumn<CustomerQuery, String> colQDate;
+    @FXML private TableColumn<CustomerQuery, String> colQStatus;
+    @FXML private TableColumn<CustomerQuery, String> colQText;
+    @FXML private TextArea workshopResponseField;
+    @FXML private Label workshopQueryStatus;
+
+    private final CustomerQueryDAO queryDAO = new CustomerQueryDAO();
+    private List<CustomerQuery> workshopQueries;
+
     // ── DAOs ─────────────────────────────────────
     private final VehicleDAO vehicleDAO           = new VehicleDAO();
     private final CustomerDAO customerDAO         = new CustomerDAO();
@@ -96,6 +110,8 @@ public class WorkshopController
         setupVehicleTableColumns();
         setupServiceTableColumns();
         setupServiceTypeOptions();
+        setupQueryTableColumns();
+
     }
 
 
@@ -123,10 +139,16 @@ public class WorkshopController
                 // ADMIN sees everything
                 // WORKSHOP sees everything (they service all)
                 // CUSTOMER sees only their own vehicles
-                if ("CUSTOMER".equals(role)) {
-                    allVehicles = customerDAO
-                            .getVehiclesByCustomerId(
-                                    currentUser.getCustomerId());
+                if ("WORKSHOP".equals(role)) {
+                    String identifier = currentUser.getIdentifier();
+                    // Workshop sees vehicles they have serviced
+                    // If no services yet, show all (first time)
+                    allVehicles = vehicleDAO.getAllVehiclesWithOwners();
+                    // They can register new vehicles for any customer
+                    // but service records are filtered to their work
+                } else if ("CUSTOMER".equals(role)) {
+                    allVehicles = customerDAO.getVehiclesByCustomerId(
+                            currentUser.getCustomerId());
                 } else {
                     allVehicles =
                             vehicleDAO.getAllVehiclesWithOwners();
@@ -167,6 +189,12 @@ public class WorkshopController
                     serviceTable.setItems(
                             FXCollections.observableArrayList(
                                     finalRecords));
+
+                    workshopQueries = queryDAO.getQueriesForWorkshop(
+                            currentUser.getUserId());
+                    Platform.runLater(() ->
+                            workshopQueryTable.setItems(
+                                    FXCollections.observableArrayList(workshopQueries)));
 
                     // Hide add/edit/delete for customers
                     // (read-only view)
@@ -667,5 +695,76 @@ public class WorkshopController
             deleteVehicleBtn.setManaged(true);
         }
     }
+
+    private void setupQueryTableColumns() {
+        if (workshopQueryTable == null) return;
+        workshopQueryTable.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY);
+        colQCustomer.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getCustomerName()));
+        colQVehicle.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getVehicleReg()));
+        colQDate.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getDate().toString()));
+        colQText.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getQueryText()));
+        colQStatus.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getResponseText() != null
+                                && !d.getValue().getResponseText().isEmpty()
+                                ? "Answered" : "Pending"));
+        colQStatus.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null); setStyle("");
+                } else {
+                    setText(item);
+                    setStyle("Answered".equals(item)
+                            ? "-fx-text-fill: #44cc88; -fx-font-weight: bold;"
+                            : "-fx-text-fill: #e63946; -fx-font-weight: bold;");
+                }
+            }
+        });
+    }
+
+    // Handler methods
+    @FXML
+    private void handleQuerySelected() {
+        CustomerQuery q = workshopQueryTable
+                .getSelectionModel().getSelectedItem();
+        if (q == null) return;
+        workshopResponseField.setText(
+                q.getResponseText() != null
+                        ? q.getResponseText() : "");
+    }
+
+    @FXML
+    private void handleWorkshopRespond() {
+        CustomerQuery q = workshopQueryTable
+                .getSelectionModel().getSelectedItem();
+        if (q == null) {
+            showStatus(workshopQueryStatus,
+                    "Select a query first.", false);
+            return;
+        }
+        if (workshopResponseField.getText().isEmpty()) {
+            showStatus(workshopQueryStatus,
+                    "Enter a response.", false);
+            return;
+        }
+        boolean ok = queryDAO.respondToQuery(
+                q.getQueryId(),
+                workshopResponseField.getText().trim());
+        showStatus(workshopQueryStatus,
+                ok ? "Response sent." : "Failed.", ok);
+        if (ok) loadAllDataAsync();
+    }
+
 
 }

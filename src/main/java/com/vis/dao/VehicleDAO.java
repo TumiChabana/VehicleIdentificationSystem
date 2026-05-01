@@ -64,7 +64,7 @@ public class VehicleDAO {
 
     // ADD VEHICLE — uses stored procedure
     public boolean addVehicle(Vehicle v) {
-        String sql = "CALL add_vehicle(?, ?, ?, ?, ?, ?)";
+        String sql = "CALL add_vehicle(?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              CallableStatement cs = conn.prepareCall(sql)) {
@@ -75,6 +75,14 @@ public class VehicleDAO {
             cs.setInt(4, v.getYear());
             cs.setString(5, v.getColor());
             cs.setInt(6, v.getOwnerId());
+            // Save image path — null if no image selected
+            if (v.getImagePath() != null
+                    && !v.getImagePath().isBlank()) {
+                cs.setString(7, v.getImagePath());
+            } else {
+                cs.setNull(7, java.sql.Types.VARCHAR);
+            }
+
             cs.execute();
             return true;
 
@@ -86,9 +94,10 @@ public class VehicleDAO {
 
     // UPDATE VEHICLE
     public boolean updateVehicle(Vehicle v) {
-        String sql = "UPDATE vehicle SET registration_number=?, make=?, " +
-                "model=?, year=?, color=?, owner_id=? " +
-                "WHERE vehicle_id=?";
+        String sql = "UPDATE vehicle SET registration_number=?," +
+                " make=?, model=?, year=?, color=?," +
+                " owner_id=?, image_path=?" +
+                " WHERE vehicle_id=?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -99,7 +108,8 @@ public class VehicleDAO {
             ps.setInt(4, v.getYear());
             ps.setString(5, v.getColor());
             ps.setInt(6, v.getOwnerId());
-            ps.setInt(7, v.getVehicleId());
+            ps.setString(7, v.getImagePath());
+            ps.setInt(8, v.getVehicleId());
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
@@ -165,6 +175,33 @@ public class VehicleDAO {
                 rs.getInt("owner_id")
         );
 
+    }
+
+    public List<Vehicle> getVehiclesByWorkshop(String workshopName) {
+        List<Vehicle> list = new ArrayList<>();
+        String sql = """
+        SELECT v.*, c.name as owner_name
+        FROM vehicle v
+        LEFT JOIN customer c ON v.owner_id = c.customer_id
+        JOIN service_record sr ON sr.vehicle_id = v.vehicle_id
+        JOIN users u ON u.identifier = ?
+        WHERE sr.vehicle_id = v.vehicle_id
+        GROUP BY v.vehicle_id, c.name
+        ORDER BY v.vehicle_id
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, workshopName);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Vehicle v = mapRow(rs);
+                v.setOwnerName(rs.getString("owner_name"));
+                list.add(v);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+        return list;
     }
 
 }

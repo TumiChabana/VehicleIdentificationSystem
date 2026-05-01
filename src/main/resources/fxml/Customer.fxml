@@ -4,6 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.*?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.CustomerController"
@@ -33,20 +35,31 @@
 
             <HBox styleClass="top-header"
                   alignment="CENTER_LEFT" spacing="20">
-                <Label text="VIS" styleClass="header-logo"/>
-                <VBox>
-                    <Label fx:id="moduleTitleLabel"
-                           text="CUSTOMER MODULE"
-                           styleClass="header-title"/>
-                    <Label fx:id="moduleSubLabel"
-                           text="Owner Information &amp; Queries"
-                           styleClass="header-sub"/>
-                </VBox>
+                <HBox spacing="9">
+                    <!-- Logo + Title -->
+                    <ImageView fitHeight="40" fitWidth="40"
+                               pickOnBounds="true" preserveRatio="true" >
+                        <image>
+                            <Image url="/images/logo3.png"/>
+                        </image>
+                    </ImageView>
+
+                    <VBox>
+                        <Label fx:id="moduleTitleLabel"
+                               text="CUSTOMER MODULE"
+                               styleClass="header-title"/>
+                        <Label fx:id="moduleSubLabel"
+                               text="Owner Information &amp; Queries"
+                               styleClass="header-sub"/>
+                    </VBox>
+
+                </HBox>
+
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="userLabel"
                        text="" styleClass="role-badge"/>
                 <Button fx:id="dashboardBtn"
-                        text="← Dashboard"
+                        text="Dashboard"
                         styleClass="btn-secondary"
                         onAction="#goToDashboard"/>
                 <Button text="Logout"
@@ -58,7 +71,7 @@
 
     <center>
         <VBox styleClass="main-content">
-            <TabPane fx:id="customerTabs"
+            <TabPane
                      styleClass="module-tabs"
                      VBox.vgrow="ALWAYS">
 
@@ -107,7 +120,7 @@
                                            styleClass="detail-key"
                                            minWidth="80"/>
                                     <Label fx:id="profileName"
-                                           text="—"
+                                           text=":"
                                            styleClass="detail-value"/>
                                 </HBox>
                                 <HBox styleClass="detail-row" spacing="8">
@@ -115,7 +128,7 @@
                                            styleClass="detail-key"
                                            minWidth="80"/>
                                     <Label fx:id="profilePhone"
-                                           text="—"
+                                           text=":"
                                            styleClass="detail-value"/>
                                 </HBox>
                                 <HBox styleClass="detail-row" spacing="8">
@@ -123,7 +136,7 @@
                                            styleClass="detail-key"
                                            minWidth="80"/>
                                     <Label fx:id="profileEmail"
-                                           text="—"
+                                           text=":"
                                            styleClass="detail-value"/>
                                 </HBox>
                                 <HBox styleClass="detail-row" spacing="8">
@@ -131,7 +144,7 @@
                                            styleClass="detail-key"
                                            minWidth="80"/>
                                     <Label fx:id="profileAddress"
-                                           text="—"
+                                           text=":"
                                            styleClass="detail-value"
                                            wrapText="true"/>
                                 </HBox>
@@ -193,7 +206,7 @@
                                 <Label text="FULL NAME"
                                        styleClass="field-label"/>
                                 <TextField fx:id="fieldName"
-                                           promptText="e.g. Litumeleng Mokoena"
+                                           promptText="e.g. Karabo Tlali"
                                            styleClass="form-field"/>
 
                                 <Label text="PHONE NUMBER"
@@ -400,7 +413,7 @@
 
                 <!-- ══ TAB 3 — MY SERVICES (Customer only) ══ -->
                 <Tab fx:id="myServicesTab"
-                     text="🔧  My Services"
+                     text="My Services"
                      closable="false"
                      >
                     <VBox styleClass="panel-card" spacing="14">
@@ -471,6 +484,83 @@
                                        style="-fx-text-fill: #555577;"/>
                             </placeholder>
                         </TableView>
+                    </VBox>
+                </Tab>
+
+                <!-- TAB 5 — MY VIOLATIONS -->
+                <Tab fx:id="myViolationsTab"
+                     text="My Violations"
+                     closable="false">
+                    <VBox styleClass="panel-card" spacing="14">
+                        <padding>
+                            <Insets top="20" right="20"
+                                    bottom="20" left="20"/>
+                        </padding>
+                        <Label text="MY VIOLATIONS"
+                               styleClass="section-title"/>
+                        <Label text="Fines and traffic violations on your vehicles"
+                               styleClass="page-subtitle"/>
+                        <TableView fx:id="myViolationsTable"
+                                   styleClass="table-view"
+                                   VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colVVehicle"
+                                             text="Vehicle"/>
+                                <TableColumn fx:id="colVDate"
+                                             text="Date"/>
+                                <TableColumn fx:id="colVType"
+                                             text="Violation"/>
+                                <TableColumn fx:id="colVFine"
+                                             text="Fine (M)"/>
+                                <TableColumn fx:id="colVStatus"
+                                             text="Status"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No violations on your vehicles"
+                                       style="-fx-text-fill: #44cc88;"/>
+                            </placeholder>
+                        </TableView>
+                    </VBox>
+                </Tab>
+
+                <!-- TAB 6 — MY POLICE REPORTS -->
+                <Tab fx:id="myPoliceReportsTab"
+                     text="My Reports"
+                     closable="false">
+                    <VBox styleClass="panel-card" spacing="14">
+                        <padding>
+                            <Insets top="20" right="20"
+                                    bottom="20" left="20"/>
+                        </padding>
+                        <Label text="POLICE REPORTS ON MY VEHICLES"
+                               styleClass="section-title"/>
+                        <Label text="Accidents, theft cases and investigations"
+                               styleClass="page-subtitle"/>
+                        <TableView fx:id="myPoliceReportsTable"
+                                   styleClass="table-view"
+                                   VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colPVehicle"
+                                             text="Vehicle"/>
+                                <TableColumn fx:id="colPDate"
+                                             text="Date"/>
+                                <TableColumn fx:id="colPType"
+                                             text="Type"/>
+                                <TableColumn fx:id="colPOfficer"
+                                             text="Officer Handling"/>
+                                <TableColumn fx:id="colPDesc"
+                                             text="Details"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No police reports on your vehicles"
+                                       style="-fx-text-fill: #44cc88;"/>
+                            </placeholder>
+                        </TableView>
+                        <VBox styleClass="stat-card" spacing="8">
+                            <Label text="ℹIf you have an active case, the officer name above is handling it."
+                                   styleClass="page-subtitle"
+                                   wrapText="true"/>
+                        </VBox>
                     </VBox>
                 </Tab>
 

@@ -49,7 +49,7 @@ public class UserDAO {
                                 rs.getString("identifier"));
                     } catch (SQLException ex) {
                         System.err.println(
-                                "⚠ New columns not yet in DB: "
+                                "New columns not yet in DB: "
                                         + ex.getMessage());
                     }
 
@@ -112,12 +112,20 @@ public class UserDAO {
                             rs.getInt("customer_id"));
                     user.setIdentifier(
                             rs.getString("identifier"));
+                    // Format the timestamp nicely
+                    Timestamp ts = rs.getTimestamp("created_at");
+                    if (ts != null) {
+                        user.setCreatedAt(ts.toLocalDateTime()
+                                .format(java.time.format.DateTimeFormatter
+                                        .ofPattern("dd MMM yyyy HH:mm")));
+                    } else {
+                        user.setCreatedAt("—");
+                    }
                 } catch (SQLException ex) {
-                    // Columns not yet added — safe to ignore
+                    user.setCreatedAt("—");
                 }
                 list.add(user);
             }
-
         } catch (SQLException e) {
             System.err.println("Error fetching users: "
                     + e.getMessage());

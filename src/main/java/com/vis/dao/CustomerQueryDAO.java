@@ -63,20 +63,41 @@ public class CustomerQueryDAO {
     }
 
     public boolean addQuery(CustomerQuery q) {
+        // Find a workshop user to assign to
+        String findWorkshop =
+                "SELECT user_id FROM users WHERE role = 'WORKSHOP' LIMIT 1";
+
         String sql = """
-            INSERT INTO customer_query
-            (customer_id, vehicle_id, query_date, query_text)
-            VALUES (?, ?, ?, ?)
-            """;
+        INSERT INTO customer_query
+        (customer_id, vehicle_id, query_date, 
+         query_text, assigned_to_user_id)
+        VALUES (?, ?, ?, ?, ?)
+        """;
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection()) {
 
-            ps.setInt(1, q.getCustomerId());
-            ps.setInt(2, q.getVehicleId());
-            ps.setDate(3, Date.valueOf(q.getDate()));
-            ps.setString(4, q.getQueryText());
-            return ps.executeUpdate() > 0;
+            // Find workshop to assign to
+            int workshopUserId = 0;
+            try (Statement st = conn.createStatement();
+                 ResultSet rs = st.executeQuery(findWorkshop)) {
+                if (rs.next()) {
+                    workshopUserId = rs.getInt("user_id");
+                }
+            }
+
+            try (PreparedStatement ps =
+                         conn.prepareStatement(sql)) {
+                ps.setInt(1, q.getCustomerId());
+                ps.setInt(2, q.getVehicleId());
+                ps.setDate(3, Date.valueOf(q.getDate()));
+                ps.setString(4, q.getQueryText());
+                if (workshopUserId > 0) {
+                    ps.setInt(5, workshopUserId);
+                } else {
+                    ps.setNull(5, java.sql.Types.INTEGER);
+                }
+                return ps.executeUpdate() > 0;
+            }
 
         } catch (SQLException e) {
             System.err.println("Error adding query: "
@@ -135,4 +156,29 @@ public class CustomerQueryDAO {
         q.setVehicleReg(rs.getString("vehicle_reg"));
         return q;
     }
+
+    public List<CustomerQuery> getQueriesForWorkshop(
+            int workshopUserId) {
+        List<CustomerQuery> list = new ArrayList<>();
+        String sql = """
+        SELECT cq.*,
+               c.name as customer_name,
+               v.registration_number as vehicle_reg
+        FROM customer_query cq
+        JOIN customer c ON cq.customer_id = c.customer_id
+        JOIN vehicle v  ON cq.vehicle_id  = v.vehicle_id
+        WHERE cq.assigned_to_user_id = ?
+        ORDER BY cq.query_date DESC
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, workshopUserId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) list.add(mapRow(rs));
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+        return list;
+    }
+
 }

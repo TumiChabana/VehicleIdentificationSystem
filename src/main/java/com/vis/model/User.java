@@ -8,6 +8,10 @@ public class User {
     private String role;
     private int customerId;      // links to customer table
     private String identifier;
+    private String createdAt;
+
+    public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String c) { this.createdAt = c; }
 
     public User() {}
 

@@ -395,6 +395,37 @@ UPDATE users SET identifier =
     'Alliance Insurance' 
 WHERE username = 'insurer1';
 
+DROP PROCEDURE IF EXISTS add_vehicle;
+
+CREATE OR REPLACE PROCEDURE add_vehicle(
+    p_reg       VARCHAR,
+    p_make      VARCHAR,
+    p_model     VARCHAR,
+    p_year      INTEGER,
+    p_color     VARCHAR,
+    p_owner_id  INTEGER,
+    p_image_path VARCHAR DEFAULT NULL
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    INSERT INTO vehicle(
+        registration_number, make, model,
+        year, color, owner_id, image_path
+    )
+    VALUES(
+        p_reg, p_make, p_model,
+        p_year, p_color, p_owner_id, p_image_path
+    );
+END;
+$$;
+
+ALTER TABLE vehicle 
+ADD COLUMN IF NOT EXISTS image_path VARCHAR(500);
+
+ALTER TABLE customer_query 
+ADD COLUMN IF NOT EXISTS assigned_to_user_id 
+INTEGER REFERENCES users(user_id) ON DELETE SET NULL;
+
 COMMIT;]]></console>
     </connection>
   </component>

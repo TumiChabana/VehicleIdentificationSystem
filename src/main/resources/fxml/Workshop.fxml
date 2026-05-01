@@ -360,6 +360,64 @@
                     </SplitPane>
                 </Tab>
 
+                <!-- TAB 3 — CUSTOMER QUERIES -->
+                <Tab text="Queries" closable="false">
+                    <VBox styleClass="panel-card" spacing="14">
+                        <padding>
+                            <Insets top="20" right="20"
+                                    bottom="20" left="20"/>
+                        </padding>
+
+                        <HBox alignment="CENTER_LEFT" spacing="16">
+                            <VBox HBox.hgrow="ALWAYS">
+                                <Label text="Customer Queries"
+                                       styleClass="section-title"/>
+                                <Label text="Questions from vehicle owners"
+                                       styleClass="page-subtitle"/>
+                            </VBox>
+                        </HBox>
+
+                        <TableView fx:id="workshopQueryTable"
+                                   styleClass="table-view"
+                                   VBox.vgrow="ALWAYS"
+                                   onMouseClicked="#handleQuerySelected">
+                            <columns>
+                                <TableColumn fx:id="colQCustomer"
+                                             text="Customer"/>
+                                <TableColumn fx:id="colQVehicle"
+                                             text="Vehicle"/>
+                                <TableColumn fx:id="colQDate"
+                                             text="Date"/>
+                                <TableColumn fx:id="colQStatus"
+                                             text="Status"/>
+                                <TableColumn fx:id="colQText"
+                                             text="Query"/>
+                            </columns>
+                            <placeholder>
+                                <Label text="No queries assigned"
+                                       style="-fx-text-fill: #555577;"/>
+                            </placeholder>
+                        </TableView>
+
+                        <!-- Response form -->
+                        <VBox styleClass="stat-card" spacing="12">
+                            <Label text="RESPOND TO QUERY"
+                                   styleClass="field-label"/>
+                            <TextArea fx:id="workshopResponseField"
+                                      promptText="Type your response here..."
+                                      styleClass="form-field"
+                                      prefHeight="80"
+                                      wrapText="true"/>
+                            <Button text="SEND RESPONSE"
+                                    styleClass="btn-primary"
+                                    onAction="#handleWorkshopRespond"/>
+                            <Label fx:id="workshopQueryStatus"
+                                   text=""
+                                   styleClass="success-label"/>
+                        </VBox>
+                    </VBox>
+                </Tab>
+
             </TabPane>
         </VBox>
     </center>

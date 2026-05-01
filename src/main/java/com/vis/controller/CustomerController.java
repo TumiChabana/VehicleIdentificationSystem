@@ -90,6 +90,7 @@ public class CustomerController
 
     // ── TAB 3 — MY SERVICES (Customer only) ──────
     @FXML private Tab myServicesTab;
+    @FXML private Tab customerTabs;
     @FXML private TableView<ServiceRecord> myServicesTable;
     @FXML private TableColumn<ServiceRecord, String> colSVehicle;
     @FXML private TableColumn<ServiceRecord, String> colSDate;
@@ -109,6 +110,23 @@ public class CustomerController
 
     @FXML private MenuBar customerMenuBar;
     @FXML private SplitPane customerSplitPane;
+
+    @FXML private Tab myViolationsTab;
+    @FXML private Tab myPoliceReportsTab;
+    @FXML private TableView<Violation> myViolationsTable;
+    @FXML private TableColumn<Violation, String> colVVehicle;
+    @FXML private TableColumn<Violation, String> colVDate;
+    @FXML private TableColumn<Violation, String> colVType;
+    @FXML private TableColumn<Violation, String> colVFine;
+    @FXML private TableColumn<Violation, String> colVStatus;
+    @FXML private TableView<PoliceReport> myPoliceReportsTable;
+    @FXML private TableColumn<PoliceReport, String> colPVehicle;
+    @FXML private TableColumn<PoliceReport, String> colPDate;
+    @FXML private TableColumn<PoliceReport, String> colPType;
+    @FXML private TableColumn<PoliceReport, String> colPOfficer;
+    @FXML private TableColumn<PoliceReport, String> colPDesc;
+
+    private final PoliceDAO policeDAO = new PoliceDAO();
 
     // ── DAOs ─────────────────────────────────────
     private final CustomerDAO customerDAO       =
@@ -134,6 +152,7 @@ public class CustomerController
         setupQueryTableColumns();
         setupServiceTableColumns();
         setupInsuranceTableColumns();
+        setupViolationTableColumns();
     }
 
     @Override
@@ -171,7 +190,7 @@ public class CustomerController
                 "Your vehicles, services, insurance and queries");
 
         // Tab 1 — switch to profile view
-        tab1.setText("👤  My Profile");
+        tab1.setText("My Profile");
 
         // Hide admin controls
         adminSearchBar.setVisible(false);
@@ -208,6 +227,12 @@ public class CustomerController
         queryCustomerFilter.setManaged(false);
         deleteQueryBtn.setVisible(false);
         deleteQueryBtn.setManaged(false);
+
+        // Show all customer tabs
+        myServicesTab.setDisable(false);
+        myInsuranceTab.setDisable(false);
+        myViolationsTab.setDisable(false);
+        myPoliceReportsTab.setDisable(false);
     }
 
     private void setupAdminView() {
@@ -220,12 +245,15 @@ public class CustomerController
         // Hide customer-only tabs
         myServicesTab.setDisable(true);
         myInsuranceTab.setDisable(true);
+        myViolationsTab.setDisable(true);
+        myPoliceReportsTab.setDisable(true);
 
         // Show respond button for admin
         respondBtn.setVisible(true);
         respondBtn.setManaged(true);
 
-        customerSplitPane.getItems().remove(1);
+        Platform.runLater(() ->
+                customerSplitPane.setDividerPositions(0.55));
     }
 
     // ── ASYNC LOADING ─────────────────────────────
@@ -271,6 +299,12 @@ public class CustomerController
         List<InsuranceRecord> myInsurance =
                 insuranceDAO.getRecordsByCustomerId(cid);
 
+        // NEW — violations and police reports
+        List<Violation> myViolations =
+                policeDAO.getViolationsByCustomerId(cid);
+        List<PoliceReport> myReports =
+                policeDAO.getReportsByCustomerId(cid);
+
         Platform.runLater(() -> {
             // Populate profile card
             if (me != null) {
@@ -282,7 +316,17 @@ public class CustomerController
                 profileAddress.setText(
                         me.getAddress() != null
                                 ? me.getAddress() : "—");
+
+
             }
+
+            // NEW
+            if (myViolationsTable != null)
+                myViolationsTable.setItems(
+                        FXCollections.observableArrayList(myViolations));
+            if (myPoliceReportsTable != null)
+                myPoliceReportsTable.setItems(
+                        FXCollections.observableArrayList(myReports));
 
             // Populate vehicle cards
             buildVehicleCards(myVehicles);
@@ -296,6 +340,7 @@ public class CustomerController
             queryVehicleCombo.setItems(
                     FXCollections.observableArrayList(myVehicles));
 
+
             // Load queries
             allQueries = myQueries;
             setupQueryPagination();
@@ -307,6 +352,8 @@ public class CustomerController
             // Load insurance table
             myInsuranceTable.setItems(
                     FXCollections.observableArrayList(myInsurance));
+
+
         });
     }
 
@@ -838,5 +885,79 @@ public class CustomerController
             scene.getStylesheets().add(base.toExternalForm());
         if (page != null)
             scene.getStylesheets().add(page.toExternalForm());
+    }
+
+    private void setupViolationTableColumns() {
+        if (myViolationsTable == null) return;
+        myViolationsTable.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY);
+        colVVehicle.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getVehicleReg()));
+        colVDate.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getViolationDate().toString()));
+        colVType.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getViolationType()));
+        colVFine.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        "M " + d.getValue().getFineAmount()));
+        colVStatus.setCellValueFactory(d ->
+                new SimpleStringProperty(d.getValue().getStatus()));
+        colVStatus.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null); setStyle("");
+                } else {
+                    setText(item);
+                    setStyle("Paid".equals(item)
+                            ? "-fx-text-fill: #44cc88; -fx-font-weight: bold;"
+                            : "-fx-text-fill: #e63946; -fx-font-weight: bold;");
+                }
+            }
+        });
+    }
+
+    private void setupPoliceReportTableColumns() {
+        if (myPoliceReportsTable == null) return;
+        myPoliceReportsTable.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY);
+        colPVehicle.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getVehicleReg()));
+        colPDate.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getDate().toString()));
+        colPType.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getReportType()));
+        colPOfficer.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getOfficerName()));
+        colPDesc.setCellValueFactory(d ->
+                new SimpleStringProperty(
+                        d.getValue().getDescription()));
+        colPType.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null); setStyle("");
+                } else {
+                    setText(item);
+                    setStyle(switch (item) {
+                        case "Theft" ->
+                                "-fx-text-fill: #e63946; -fx-font-weight: bold;";
+                        case "Accident" ->
+                                "-fx-text-fill: #ffaa00; -fx-font-weight: bold;";
+                        default ->
+                                "-fx-text-fill: #aaaacc;";
+                    });
+                }
+            }
+        });
     }
 }

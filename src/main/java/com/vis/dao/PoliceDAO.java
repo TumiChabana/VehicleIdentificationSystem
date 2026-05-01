@@ -35,10 +35,12 @@ public class PoliceDAO {
     }
 
     public boolean addReport(PoliceReport r) {
-        String sql = "INSERT INTO police_report " +
-                "(vehicle_id, report_date, report_type, " +
-                "description, officer_name) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        String sql = """
+        INSERT INTO police_report
+        (vehicle_id, report_date, report_type,
+         description, officer_name, created_by_user_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -48,7 +50,15 @@ public class PoliceDAO {
             ps.setString(3, r.getReportType());
             ps.setString(4, r.getDescription());
             ps.setString(5, r.getOfficerName());
+            // Tag this report to the officer who filed it
+            if (r.getCreatedByUserId() > 0) {
+                ps.setInt(6, r.getCreatedByUserId());
+            } else {
+                ps.setNull(6, java.sql.Types.INTEGER);
+            }
             return ps.executeUpdate() > 0;
+
+
 
         } catch (SQLException e) {
             System.err.println("Error adding report: " + e.getMessage());
@@ -107,9 +117,12 @@ public class PoliceDAO {
     }
 
     public boolean addViolation(Violation v) {
-        String sql = "INSERT INTO violation " +
-                "(vehicle_id, violation_date, violation_type, " +
-                "fine_amount, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = """
+        INSERT INTO violation
+        (vehicle_id, violation_date, violation_type,
+         fine_amount, status, created_by_user_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -119,7 +132,13 @@ public class PoliceDAO {
             ps.setString(3, v.getViolationType());
             ps.setDouble(4, v.getFineAmount());
             ps.setString(5, v.getStatus());
+            if (v.getCreatedByUserId() > 0) {
+                ps.setInt(6, v.getCreatedByUserId());
+            } else {
+                ps.setNull(6, java.sql.Types.INTEGER);
+            }
             return ps.executeUpdate() > 0;
+
 
         } catch (SQLException e) {
             System.err.println("Error adding violation: " + e.getMessage());
@@ -236,6 +255,30 @@ public class PoliceDAO {
                 PoliceReport r = mapReport(rs);
                 r.setVehicleReg(rs.getString("reg"));
                 list.add(r);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+        return list;
+    }
+
+    public List<Violation> getViolationsByCustomerId(int customerId) {
+        List<Violation> list = new ArrayList<>();
+        String sql = """
+        SELECT vl.*, v.registration_number as reg
+        FROM violation vl
+        JOIN vehicle v ON vl.vehicle_id = v.vehicle_id
+        WHERE v.owner_id = ?
+        ORDER BY vl.violation_date DESC
+        """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Violation v = mapViolation(rs);
+                v.setVehicleReg(rs.getString("reg"));
+                list.add(v);
             }
         } catch (SQLException e) {
             System.err.println("Error: " + e.getMessage());

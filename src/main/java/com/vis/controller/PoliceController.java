@@ -303,7 +303,7 @@ public class PoliceController
                 || reportTypeCombo.getValue() == null
                 || reportOfficerField.getText().isEmpty()) {
             showStatus(reportFormStatus,
-                    "⚠ Please fill in all required fields.",
+                    "Please fill in all required fields.",
                     false);
             return;
         }
@@ -315,6 +315,7 @@ public class PoliceController
         r.setReportType(reportTypeCombo.getValue());
         r.setOfficerName(reportOfficerField.getText().trim());
         r.setDescription(reportDescField.getText().trim());
+        r.setCreatedByUserId(currentUser.getUserId());
 
         boolean success = policeDAO.addReport(r);
         showStatus(reportFormStatus,
@@ -432,6 +433,7 @@ public class PoliceController
                     violationStatusCombo.getValue() != null
                             ? violationStatusCombo.getValue()
                             : "Unpaid");
+            v.setCreatedByUserId(currentUser.getUserId());
 
             boolean success = policeDAO.addViolation(v);
             showStatus(violationFormStatus,
