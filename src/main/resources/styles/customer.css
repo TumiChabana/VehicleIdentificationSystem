@@ -29,6 +29,9 @@
     -fx-border-width: 1;
 }
 
+.detail-row {
+-fx-text-fill: white}
+
 .module-tabs {
     -fx-background-color: #0d0d1a;
     -fx-tab-min-height: 44px;

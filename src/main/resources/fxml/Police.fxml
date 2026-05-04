@@ -60,7 +60,7 @@
 
 
                 <Button fx:id="dashboardBtn"
-                        text="← Dashboard"
+                        text="Dashboard"
                         styleClass="btn-secondary"
                         onAction="#goToDashboard"/>
                 <Button text="Logout"
@@ -103,7 +103,7 @@
                                            styleClass="form-field"
                                            HBox.hgrow="ALWAYS"
                                            onKeyReleased="#handleReportSearch"/>
-                                <Button text="+ Add Report"
+                                <Button text="Add Report"
                                         styleClass="btn-primary"
                                         onAction="#handleAddReport"/>
                                 <Button text="Clear"
@@ -233,7 +233,7 @@
                                            styleClass="form-field"
                                            HBox.hgrow="ALWAYS"
                                            onKeyReleased="#handleViolationSearch"/>
-                                <Button text="+ Add Violation"
+                                <Button text="Add Violation"
                                         styleClass="btn-primary"
                                         onAction="#handleAddViolation"/>
                                 <Button text="Clear"
@@ -267,7 +267,7 @@
                                 <Button text="Mark as Paid"
                                         styleClass="btn-primary"
                                         onAction="#handleMarkPaid"/>
-                                <Button text="↩ Mark as Unpaid"
+                                <Button text="Mark as Unpaid"
                                         styleClass="btn-secondary"
                                         onAction="#handleMarkUnpaid"/>
                                 <Button text="Delete"

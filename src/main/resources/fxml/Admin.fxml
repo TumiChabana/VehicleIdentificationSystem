@@ -160,6 +160,15 @@
                               maxWidth="Infinity"
                               visible="false" managed="false"/>
 
+                    <Label fx:id="identifierLabel"
+                           text="COMPANY / WORKSHOP NAME"
+                           styleClass="field-label"
+                           visible="false" managed="false"/>
+                    <TextField fx:id="identifierField"
+                               promptText="e.g. Alliance Insurance"
+                               styleClass="form-field"
+                               visible="false" managed="false"/>
+
                     <!-- Role descriptions -->
                     <VBox styleClass="role-info-card"
                           spacing="8">

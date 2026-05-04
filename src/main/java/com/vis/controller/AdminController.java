@@ -38,6 +38,10 @@ public class AdminController
     @FXML private Label customerLinkLabel;
     @FXML private ComboBox<Customer> customerLinkCombo;
 
+    @FXML private Label identifierLabel;
+    @FXML private TextField identifierField;
+
+
     private final CustomerDAO customerDAO = new CustomerDAO();
     private final UserDAO userDAO = new UserDAO();
 
@@ -148,6 +152,7 @@ public class AdminController
 
     // ── USER MANAGEMENT ───────────────────────────
 
+
     @FXML
     private void handleAddUser() {
         if (fieldUsername.getText().isEmpty()
@@ -157,30 +162,38 @@ public class AdminController
             return;
         }
 
-        boolean success = UserDAO.register(
+        boolean success = userDAO.register(
                 fieldUsername.getText().trim(),
                 fieldPassword.getText().trim(),
                 roleCombo.getValue());
 
-        // If customer role, link to customer record
-        if (success && "CUSTOMER".equals(roleCombo.getValue())
-                && customerLinkCombo.getValue() != null) {
-            UserDAO.linkCustomer(
-                    fieldUsername.getText().trim(),
-                    customerLinkCombo.getValue().getId());
-        }
-
-        showStatus(
-                success ? "User created successfully."
-                        : "Failed - username may exist.",
-                success);
-
         if (success) {
+            // Link customer if CUSTOMER role
+            if ("CUSTOMER".equals(roleCombo.getValue())
+                    && customerLinkCombo.getValue() != null) {
+                userDAO.linkCustomer(
+                        fieldUsername.getText().trim(),
+                        customerLinkCombo.getValue().getId());
+            }
+
+            // Save identifier if INSURANCE or WORKSHOP
+            if (("INSURANCE".equals(roleCombo.getValue())
+                    || "WORKSHOP".equals(roleCombo.getValue()))
+                    && !identifierField.getText().isBlank()) {
+                userDAO.setIdentifier(
+                        fieldUsername.getText().trim(),
+                        identifierField.getText().trim());
+            }
+
+            showStatus("User created successfully.", true);
             fieldUsername.clear();
             fieldPassword.clear();
             roleCombo.setValue(null);
+            identifierField.clear();
             customerLinkCombo.setValue(null);
             loadUsersAsync();
+        } else {
+            showStatus("Failed — username may exist.", false);
         }
     }
 
@@ -272,6 +285,11 @@ public class AdminController
     private void handleRoleChange() {
         boolean isCustomer = "CUSTOMER".equals(
                 roleCombo.getValue());
+        boolean needsIdentifier =
+                "INSURANCE".equals(roleCombo.getValue())
+                        || "WORKSHOP".equals(roleCombo.getValue());
+
+        // Customer link combo
         customerLinkLabel.setVisible(isCustomer);
         customerLinkLabel.setManaged(isCustomer);
         customerLinkCombo.setVisible(isCustomer);
@@ -281,6 +299,21 @@ public class AdminController
             customerLinkCombo.setItems(
                     FXCollections.observableArrayList(
                             customerDAO.getAllCustomers()));
+        }
+
+        // Identifier field for Insurance and Workshop
+        identifierLabel.setVisible(needsIdentifier);
+        identifierLabel.setManaged(needsIdentifier);
+        identifierField.setVisible(needsIdentifier);
+        identifierField.setManaged(needsIdentifier);
+
+        // Update placeholder text based on role
+        if ("INSURANCE".equals(roleCombo.getValue())) {
+            identifierField.setPromptText(
+                    "e.g. Alliance Insurance");
+        } else if ("WORKSHOP".equals(roleCombo.getValue())) {
+            identifierField.setPromptText(
+                    "e.g. Maseru AutoLand");
         }
     }
 }

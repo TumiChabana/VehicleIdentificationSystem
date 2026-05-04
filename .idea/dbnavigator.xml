@@ -11,10 +11,10 @@
   </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
     <assistants>
-      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
+      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
       </assistant-state>
-      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
+      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
         <tools />
       </assistant-state>
     </assistants>
@@ -425,6 +425,10 @@ ADD COLUMN IF NOT EXISTS image_path VARCHAR(500);
 ALTER TABLE customer_query 
 ADD COLUMN IF NOT EXISTS assigned_to_user_id 
 INTEGER REFERENCES users(user_id) ON DELETE SET NULL;
+
+SELECT user_id, username, role, identifier 
+FROM users 
+WHERE role = 'INSURANCE' OR role = 'WORKSHOP';
 
 COMMIT;]]></console>
     </connection>

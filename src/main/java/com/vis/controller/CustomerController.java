@@ -90,7 +90,7 @@ public class CustomerController
 
     // ── TAB 3 — MY SERVICES (Customer only) ──────
     @FXML private Tab myServicesTab;
-    @FXML private Tab customerTabs;
+    @FXML private TabPane customerTabs;
     @FXML private TableView<ServiceRecord> myServicesTable;
     @FXML private TableColumn<ServiceRecord, String> colSVehicle;
     @FXML private TableColumn<ServiceRecord, String> colSDate;
@@ -153,6 +153,7 @@ public class CustomerController
         setupServiceTableColumns();
         setupInsuranceTableColumns();
         setupViolationTableColumns();
+        setupPoliceReportTableColumns();
     }
 
     @Override
@@ -233,6 +234,11 @@ public class CustomerController
         myInsuranceTab.setDisable(false);
         myViolationsTab.setDisable(false);
         myPoliceReportsTab.setDisable(false);
+
+        if (myServicesTab != null) myServicesTab.setDisable(false);
+        if (myInsuranceTab != null) myInsuranceTab.setDisable(false);
+        if (myViolationsTab != null) myViolationsTab.setDisable(false);
+        if (myPoliceReportsTab != null) myPoliceReportsTab.setDisable(false);
     }
 
     private void setupAdminView() {
@@ -242,18 +248,33 @@ public class CustomerController
                 "Owner Information & Vehicle Queries");
         tab1.setText("Customers");
 
-        // Hide customer-only tabs
-        myServicesTab.setDisable(true);
-        myInsuranceTab.setDisable(true);
-        myViolationsTab.setDisable(true);
-        myPoliceReportsTab.setDisable(true);
+        // Safely remove customer-only tabs
+        if (customerTabs != null) {
+            customerTabs.getTabs().removeAll(
+                    myServicesTab, myInsuranceTab,
+                    myViolationsTab, myPoliceReportsTab);
+        }
+
 
         // Show respond button for admin
         respondBtn.setVisible(true);
         respondBtn.setManaged(true);
 
-        Platform.runLater(() ->
-                customerSplitPane.setDividerPositions(0.55));
+        Platform.runLater(() -> {
+            if (customerSplitPane != null) {
+                customerSplitPane.setDividerPositions(0.55);
+            }
+        });
+
+        // Make sure admin form is visible
+        adminCustomerForm.setVisible(true);
+        adminCustomerForm.setManaged(true);
+
+        // Make sure customer-only panels are hidden
+        customerProfileCard.setVisible(false);
+        customerProfileCard.setManaged(false);
+        myVehiclesPanel.setVisible(false);
+        myVehiclesPanel.setManaged(false);
     }
 
     // ── ASYNC LOADING ─────────────────────────────

@@ -100,7 +100,7 @@
                                            styleClass="form-field"
                                            HBox.hgrow="ALWAYS"
                                            onKeyReleased="#handleVehicleSearch"/>
-                                <Button text="+ Add Vehicle"
+                                <Button text="Add Vehicle"
                                         styleClass="btn-primary"
                                         onAction="#handleAddVehicle"/>
                                 <Button text="Clear"

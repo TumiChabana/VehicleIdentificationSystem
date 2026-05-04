@@ -9,8 +9,8 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.vis.controller.CustomerController"
-            styleClass="root-pane">
-
+            styleClass="root-pane"
+            stylesheets="@../styles/customer.css">
     <top>
         <VBox>
             <MenuBar fx:id="customerMenuBar" styleClass="menu-bar">
@@ -71,7 +71,7 @@
 
     <center>
         <VBox styleClass="main-content">
-            <TabPane
+            <TabPane fx:id="customerTabs"
                      styleClass="module-tabs"
                      VBox.vgrow="ALWAYS">
 
@@ -80,7 +80,9 @@
                      text="Customers"
                      closable="false">
                     <SplitPane fx:id="customerSplitPane" dividerPositions="0.62"
-                               styleClass="split-pane">
+                               styleClass="split-pane" VBox.vgrow="ALWAYS"
+                               maxWidth="Infinity"
+                               maxHeight="Infinity">
 
                         <!-- LEFT: Table (Admin) / Profile Card (Customer) -->
                         <VBox fx:id="adminCustomerPanel"
@@ -99,7 +101,7 @@
                                            styleClass="form-field"
                                            HBox.hgrow="ALWAYS"
                                            onKeyReleased="#handleCustomerSearch"/>
-                                <Button text="+ Add Customer"
+                                <Button text="Add Customer"
                                         styleClass="btn-primary"
                                         onAction="#handleAddCustomer"/>
                                 <Button text="Clear"
@@ -189,11 +191,12 @@
                         <!-- RIGHT: Form (Admin) / My Vehicles (Customer) -->
                         <ScrollPane styleClass="scroll-pane"
                                     fitToWidth="true">
-
+                            <VBox>
                             <!-- ADMIN FORM -->
                             <VBox fx:id="adminCustomerForm"
                                   styleClass="panel-card"
-                                  spacing="16">
+                                  spacing="16"
+                                  VBox.vgrow="ALWAYS">
                                 <padding>
                                     <Insets top="20" right="24"
                                             bottom="20" left="24"/>
@@ -259,6 +262,7 @@
                                 <VBox fx:id="myVehiclesList"
                                       spacing="12"/>
                             </VBox>
+                            </VBox>
 
                         </ScrollPane>
                     </SplitPane>
@@ -282,7 +286,7 @@
                                           styleClass="form-combo"
                                           prefWidth="240"
                                           onAction="#handleQueryFilter"/>
-                                <Button text="+ New Query"
+                                <Button text="New Query"
                                         styleClass="btn-primary"
                                         onAction="#handleNewQuery"/>
                                 <Button text="Clear"
@@ -527,18 +531,29 @@
                 <Tab fx:id="myPoliceReportsTab"
                      text="My Reports"
                      closable="false">
-                    <VBox styleClass="panel-card" spacing="14">
+
+                    <!-- ← VBox must grow to fill tab -->
+                    <VBox styleClass="panel-card" spacing="14"
+                          maxWidth="Infinity" maxHeight="Infinity">
                         <padding>
                             <Insets top="20" right="20"
                                     bottom="20" left="20"/>
                         </padding>
+
                         <Label text="POLICE REPORTS ON MY VEHICLES"
                                styleClass="section-title"/>
                         <Label text="Accidents, theft cases and investigations"
                                styleClass="page-subtitle"/>
+
+                        <!-- ← TableView must grow to fill VBox -->
                         <TableView fx:id="myPoliceReportsTable"
                                    styleClass="table-view"
-                                   VBox.vgrow="ALWAYS">
+                                   VBox.vgrow="ALWAYS"
+                                   maxWidth="Infinity"
+                                   maxHeight="Infinity">
+                            <columnResizePolicy>
+                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                            </columnResizePolicy>
                             <columns>
                                 <TableColumn fx:id="colPVehicle"
                                              text="Vehicle"/>
@@ -556,11 +571,14 @@
                                        style="-fx-text-fill: #44cc88;"/>
                             </placeholder>
                         </TableView>
+
+                        <!-- Info card at bottom -->
                         <VBox styleClass="stat-card" spacing="8">
-                            <Label text="ℹIf you have an active case, the officer name above is handling it."
+                            <Label text="The officer name shown is handling your case."
                                    styleClass="page-subtitle"
                                    wrapText="true"/>
                         </VBox>
+
                     </VBox>
                 </Tab>
 

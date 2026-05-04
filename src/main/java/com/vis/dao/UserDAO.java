@@ -163,4 +163,20 @@ public class UserDAO {
             return false;
         }
     }
+
+    public boolean setIdentifier(String username,
+                                 String identifier) {
+        String sql = "UPDATE users SET identifier = ? " +
+                "WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, identifier);
+            ps.setString(2, username);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error setting identifier: "
+                    + e.getMessage());
+            return false;
+        }
+    }
 }
