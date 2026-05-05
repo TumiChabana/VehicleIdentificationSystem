@@ -2,6 +2,7 @@ package com.vis.dao;
 
 import com.vis.model.ServiceRecord;
 import com.vis.util.DBConnection;
+import com.vis.util.DataCache;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -71,7 +72,9 @@ public class ServiceRecordDAO {
             ps.setString(3, sr.getServiceType());
             ps.setString(4, sr.getDescription());
             ps.setDouble(5, sr.getCost());
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
 
         } catch (SQLException e) {
             System.err.println("Error adding service: "
@@ -88,7 +91,9 @@ public class ServiceRecordDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
 
         } catch (SQLException e) {
             System.err.println("Error deleting service: "

@@ -40,20 +40,20 @@ public abstract class BaseModuleController {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/Dashboard.fxml"));
             Scene scene = new Scene(loader.load());
-            scene.getStylesheets().add(
-                    getClass().getResource("/styles/base.css")
-                            .toExternalForm());
+            applyStylesheet(scene, "/styles/base.css");
+            applyStylesheet(scene, "/styles/dashboard.css");
 
             DashboardController dc = loader.getController();
             dc.initUser(currentUser);
 
             Stage stage = (Stage) anyLabel.getScene().getWindow();
-            stage.setScene(scene);
-            BaseModuleController.applyStageDefaults(stage);
+            smoothTransition(stage, scene);
+
         } catch (Exception e) {
-            System.err.println("Navigation error: " + e.getMessage());
+            System.err.println("Dashboard nav error: " + e.getMessage());
         }
     }
+
 
     protected void navigateToModule(String fxmlPath,
                                     String cssPath,
@@ -62,29 +62,57 @@ public abstract class BaseModuleController {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource(fxmlPath));
             Scene scene = new Scene(loader.load());
-
-            java.net.URL base =
-                    getClass().getResource("/styles/base.css");
-            java.net.URL css  =
-                    getClass().getResource(cssPath);
-            if (base != null)
-                scene.getStylesheets().add(base.toExternalForm());
-            if (css != null)
-                scene.getStylesheets().add(css.toExternalForm());
+            applyStylesheet(scene, "/styles/base.css");
+            applyStylesheet(scene, cssPath);
 
             Object controller = loader.getController();
-            if (controller instanceof BaseModuleController) {
-                ((BaseModuleController) controller)
-                        .initUser(currentUser);
+            if (controller instanceof BaseModuleController bmc) {
+                bmc.initUser(currentUser);
             }
 
             Stage stage = (Stage) anyLabel.getScene().getWindow();
-            stage.setScene(scene);
-            BaseModuleController.applyStageDefaults(stage);
+            smoothTransition(stage, scene);
 
         } catch (Exception e) {
-            System.err.println("Navigation error: " + e.getMessage());
+            System.err.println("Module nav error: " + e.getMessage());
         }
+    }
+
+    // ── SHARED TRANSITION — used by every navigation ──
+// This is the single method all navigation calls.
+// Fade out → swap scene → maximize → fade in.
+    public static void smoothTransition(Stage stage, Scene newScene) {
+        javafx.animation.FadeTransition fadeOut =
+                new javafx.animation.FadeTransition(
+                        javafx.util.Duration.millis(200),
+                        stage.getScene().getRoot());
+        fadeOut.setFromValue(1.0);
+        fadeOut.setToValue(0.0);
+        fadeOut.setOnFinished(e -> {
+            stage.setScene(newScene);
+            stage.setFullScreen(false);
+            stage.setMaximized(false);
+            stage.setMinWidth(1000);
+            stage.setMinHeight(650);
+            Platform.runLater(() ->
+                    Platform.runLater(() -> {
+                        stage.setMaximized(true);
+                        javafx.animation.FadeTransition fadeIn =
+                                new javafx.animation.FadeTransition(
+                                        javafx.util.Duration.millis(200),
+                                        newScene.getRoot());
+                        fadeIn.setFromValue(0.0);
+                        fadeIn.setToValue(1.0);
+                        fadeIn.play();
+                    }));
+        });
+        fadeOut.play();
+    }
+
+    private void applyStylesheet(Scene scene, String path) {
+        java.net.URL url = getClass().getResource(path);
+        if (url != null)
+            scene.getStylesheets().add(url.toExternalForm());
     }
 
     protected void applyRoleBasedMenus(MenuBar menuBar,

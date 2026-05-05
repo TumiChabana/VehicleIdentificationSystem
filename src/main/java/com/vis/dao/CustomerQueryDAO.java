@@ -157,23 +157,20 @@ public class CustomerQueryDAO {
         return q;
     }
 
-    public List<CustomerQuery> getQueriesForWorkshop(
-            int workshopUserId) {
+    public List<CustomerQuery> getQueriesForWorkshop() {
         List<CustomerQuery> list = new ArrayList<>();
         String sql = """
-        SELECT cq.*,
-               c.name as customer_name,
-               v.registration_number as vehicle_reg
-        FROM customer_query cq
-        JOIN customer c ON cq.customer_id = c.customer_id
-        JOIN vehicle v  ON cq.vehicle_id  = v.vehicle_id
-        WHERE cq.assigned_to_user_id = ?
-        ORDER BY cq.query_date DESC
-        """;
+    SELECT cq.*,
+           c.name as customer_name,
+           v.registration_number as vehicle_reg
+    FROM customer_query cq
+    JOIN customer c ON cq.customer_id = c.customer_id
+    JOIN vehicle v  ON cq.vehicle_id  = v.vehicle_id
+    ORDER BY cq.query_date DESC
+    """;
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, workshopUserId);
-            ResultSet rs = ps.executeQuery();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException e) {
             System.err.println("Error: " + e.getMessage());

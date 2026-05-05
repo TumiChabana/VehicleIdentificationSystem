@@ -139,48 +139,7 @@
                 </VBox>
 
                 <!-- ── STAT CARDS ── -->
-                <HBox spacing="16">
-                    <VBox styleClass="stat-card"
-                          HBox.hgrow="ALWAYS" spacing="8">
-                        <Label text="TOTAL VEHICLES"
-                               styleClass="stat-label"/>
-                        <Label fx:id="totalVehicles"
-                               text="—"
-                               styleClass="stat-number"/>
-                        <Label text="Registered in system"
-                               styleClass="stat-label"/>
-                    </VBox>
-                    <VBox styleClass="stat-card"
-                          HBox.hgrow="ALWAYS" spacing="8">
-                        <Label text="TOTAL CUSTOMERS"
-                               styleClass="stat-label"/>
-                        <Label fx:id="totalCustomers"
-                               text="—"
-                               styleClass="stat-number"/>
-                        <Label text="Vehicle owners"
-                               styleClass="stat-label"/>
-                    </VBox>
-                    <VBox styleClass="stat-card"
-                          HBox.hgrow="ALWAYS" spacing="8">
-                        <Label text="UNPAID VIOLATIONS"
-                               styleClass="stat-label"/>
-                        <Label fx:id="totalViolations"
-                               text="—"
-                               styleClass="stat-number"/>
-                        <Label text="Pending fines"
-                               styleClass="stat-label"/>
-                    </VBox>
-                    <VBox styleClass="stat-card"
-                          HBox.hgrow="ALWAYS" spacing="8">
-                        <Label text="ACTIVE POLICIES"
-                               styleClass="stat-label"/>
-                        <Label fx:id="totalInsurance"
-                               text="—"
-                               styleClass="stat-number"/>
-                        <Label text="Insurance active"
-                               styleClass="stat-label"/>
-                    </VBox>
-                </HBox>
+
 
                 <!-- ── VEHICLES TABLE ── -->
                 <VBox styleClass="stat-card" spacing="14">

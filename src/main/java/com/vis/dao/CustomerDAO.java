@@ -3,6 +3,7 @@ package com.vis.dao;
 import com.vis.model.Customer;
 import com.vis.model.Vehicle;
 import com.vis.util.DBConnection;
+import com.vis.util.DataCache;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -53,7 +54,9 @@ public class CustomerDAO {
             ps.setString(2, c.getAddress());
             ps.setString(3, c.getPhone());
             ps.setString(4, c.getEmail());
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
 
         } catch (SQLException e) {
             System.err.println("Error adding customer: " + e.getMessage());
@@ -73,7 +76,9 @@ public class CustomerDAO {
             ps.setString(3, c.getPhone());
             ps.setString(4, c.getEmail());
             ps.setInt(5, c.getId());
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
 
         } catch (SQLException e) {
             System.err.println("Error updating customer: " + e.getMessage());
@@ -88,7 +93,9 @@ public class CustomerDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
 
         } catch (SQLException e) {
             System.err.println("Error deleting customer: " + e.getMessage());

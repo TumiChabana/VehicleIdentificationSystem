@@ -430,6 +430,21 @@ SELECT user_id, username, role, identifier
 FROM users 
 WHERE role = 'INSURANCE' OR role = 'WORKSHOP';
 
+ALTER TABLE customer_query 
+ADD COLUMN IF NOT EXISTS assigned_to_user_id 
+INTEGER REFERENCES users(user_id) ON DELETE SET NULL;
+
+SELECT user_id, username, role 
+FROM users 
+WHERE role = 'WORKSHOP';
+
+UPDATE customer_query 
+SET assigned_to_user_id = 11
+WHERE assigned_to_user_id IS NULL;
+
+SELECT query_id, query_text, assigned_to_user_id 
+FROM customer_query;
+
 COMMIT;]]></console>
     </connection>
   </component>

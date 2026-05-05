@@ -6,6 +6,7 @@ import com.vis.dao.PoliceDAO;
 import com.vis.dao.VehicleDAO;
 import com.vis.model.*;
 import com.vis.util.DBConnection;
+import com.vis.util.DataCache;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -321,9 +322,26 @@ public class DashboardController implements Initializable {
         Task<DashboardData> task = new Task<>() {
             @Override
             protected DashboardData call() {
-                // This runs on a BACKGROUND thread
-                // Safe to do slow DB operations here
                 DashboardData data = new DashboardData();
+                DataCache cache = DataCache.getInstance();
+
+                if (cache.isReady()) {
+                    // Cache hit — instant, no DB call needed
+                    data.vehicles   = cache.vehicles;
+                    data.customers  = cache.customers;
+                    data.violations = cache.violations;
+                    data.insurance  = cache.insurance;
+                } else {
+                    // Cache miss — fall back to normal DB fetch
+                    data.vehicles   =
+                            vehicleDAO.getAllVehiclesWithOwners();
+                    data.customers  =
+                            customerDAO.getAllCustomers();
+                    data.violations =
+                            policeDAO.getAllViolations();
+                    data.insurance  =
+                            insuranceDAO.getAllRecords();
+                }
 
                 updateMessage("Loading vehicles...");
                 data.vehicles  = vehicleDAO.getAllVehiclesWithOwners();
@@ -434,25 +452,25 @@ public class DashboardController implements Initializable {
         String[] activities = {
                 "Vehicle LSO-001-AA registered",
                 "Police report filed - Accident",
-                "Insurance policy LNI-2024-001 activated",
+                "Insurance policy ZS-2024-001 activated",
                 "Violation recorded - Speeding",
-                "Customer Litumeleng Mokoena added",
+                "Customer Litumelo Mokoena added",
                 "Service record added - Oil Change",
                 "Vehicle LSO-002-BB registered",
                 "Fine paid — LSO-001-AA",
                 "Theft report filed - LSO-004-DD",
                 "Policy ALI-2024-002 activated",
-                "Customer Thabo Nkosi added",
+                "Customer Thabo Lekhoa added",
                 "Violation - Illegal Parking",
                 "Service - Full Service LSO-003-CC",
                 "Vehicle LSO-005-EE registered",
                 "Suspicious vehicle report filed",
-                "Customer Palesa Lerato added",
+                "Customer Palesa Mokitimi added",
                 "Violation - Running Red Light",
                 "Policy MET-2023-003 expired",
                 "Service - Brake Service LSO-001-AA",
                 "Vehicle LSO-007-GG registered",
-                "Customer Mpho Sithole added",
+                "Customer Mpho Serati added",
                 "Fine paid - LSO-005-EE"
         };
 
@@ -504,10 +522,8 @@ public class DashboardController implements Initializable {
                     getClass().getResource("/fxml/Login.fxml"));
             Scene scene = new Scene(loader.load());
             applyStyles(scene, "/styles/login.css");
-            Stage stage = (Stage) welcomeLabel
-                    .getScene().getWindow();
-            stage.setScene(scene);
-            BaseModuleController.applyStageDefaults(stage);
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            BaseModuleController.smoothTransition(stage, scene);
         } catch (Exception e) {
             System.err.println("Logout error: " + e.getMessage());
         }
@@ -539,40 +555,15 @@ public class DashboardController implements Initializable {
             applyStyles(scene, cssPath);
 
             Object controller = loader.getController();
-            if (controller instanceof BaseModuleController) {
-                ((BaseModuleController) controller)
-                        .initUser(currentUser);
+            if (controller instanceof BaseModuleController bmc) {
+                bmc.initUser(currentUser);
             }
 
-            Stage stage = (Stage) welcomeLabel
-                    .getScene().getWindow();
-
-            // Smooth fade transition between screens
-            FadeTransition fadeOut = new FadeTransition(
-                    Duration.millis(250),
-                    stage.getScene().getRoot());
-            fadeOut.setFromValue(1.0);
-            fadeOut.setToValue(0.0);
-            fadeOut.setOnFinished(e -> {
-                stage.setScene(scene);
-                stage.setMaximized(false);
-                stage.setMinWidth(1000);
-                stage.setMinHeight(650);
-
-                Platform.runLater(() -> {
-                    stage.setMaximized(true);
-                    FadeTransition fadeIn = new FadeTransition(
-                            Duration.millis(250), scene.getRoot());
-                    fadeIn.setFromValue(0.0);
-                    fadeIn.setToValue(1.0);
-                    fadeIn.play();
-                });
-            });
-            fadeOut.play();
+            Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+            BaseModuleController.smoothTransition(stage, scene);
 
         } catch (Exception e) {
-            System.err.println("Navigation error: "
-                    + e.getMessage());
+            System.err.println("Navigation error: " + e.getMessage());
         }
     }
 

@@ -3,6 +3,7 @@ package com.vis.dao;
 import com.vis.model.PoliceReport;
 import com.vis.model.Violation;
 import com.vis.util.DBConnection;
+import com.vis.util.DataCache;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -56,7 +57,9 @@ public class PoliceDAO {
             } else {
                 ps.setNull(6, java.sql.Types.INTEGER);
             }
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
 
 
 
@@ -97,7 +100,10 @@ public class PoliceDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
+
         } catch (SQLException e) {
             System.err.println("Error: " + e.getMessage());
             return false;

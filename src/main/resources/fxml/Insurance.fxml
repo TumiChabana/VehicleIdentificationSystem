@@ -247,65 +247,7 @@
                                    styleClass="page-subtitle"/>
 
                             <!-- Summary cards -->
-                            <HBox spacing="16">
-                                <VBox styleClass="stat-card"
-                                      HBox.hgrow="ALWAYS"
-                                      spacing="8">
-                                    <Label text="ACTIVE POLICIES"
-                                           styleClass="stat-label"/>
-                                    <Label fx:id="activeCount"
-                                           text="0"
-                                           styleClass="stat-number"/>
-                                    <ProgressBar
-                                            fx:id="activeProgressBar"
-                                            progress="0"
-                                            maxWidth="Infinity"
-                                            styleClass="progress-bar"/>
-                                </VBox>
-                                <VBox styleClass="stat-card"
-                                      HBox.hgrow="ALWAYS"
-                                      spacing="8">
-                                    <Label text="EXPIRED POLICIES"
-                                           styleClass="stat-label"/>
-                                    <Label fx:id="expiredCount"
-                                           text="0"
-                                           style="-fx-text-fill: #ffaa00;
-                                                  -fx-font-size: 42px;
-                                                  -fx-font-weight: bold;"/>
-                                    <ProgressBar
-                                            fx:id="expiredProgressBar"
-                                            progress="0"
-                                            maxWidth="Infinity"
-                                            styleClass="progress-bar"/>
-                                </VBox>
-                                <VBox styleClass="stat-card"
-                                      HBox.hgrow="ALWAYS"
-                                      spacing="8">
-                                    <Label text="CANCELLED POLICIES"
-                                           styleClass="stat-label"/>
-                                    <Label fx:id="cancelledCount"
-                                           text="0"
-                                           style="-fx-text-fill: #e63946;
-                                                  -fx-font-size: 42px;
-                                                  -fx-font-weight: bold;"/>
-                                    <ProgressBar
-                                            fx:id="cancelledProgressBar"
-                                            progress="0"
-                                            maxWidth="Infinity"
-                                            styleClass="progress-bar"/>
-                                </VBox>
-                                <VBox styleClass="stat-card"
-                                      HBox.hgrow="ALWAYS"
-                                      spacing="8">
-                                    <Label text="TOTAL PREMIUM (M)"
-                                           styleClass="stat-label"/>
-                                    <Label fx:id="totalPremium"
-                                           text="0"
-                                           styleClass="stat-number"/>
-                                    <Label text="Annual revenue"
-                                           styleClass="stat-label"/>
-                                </VBox>
-                            </HBox>
+
 
                             <!-- Expiring soon -->
                             <VBox styleClass="stat-card"

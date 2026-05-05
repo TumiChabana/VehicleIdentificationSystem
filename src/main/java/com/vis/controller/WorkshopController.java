@@ -190,11 +190,9 @@ public class WorkshopController
                             FXCollections.observableArrayList(
                                     finalRecords));
 
-                    workshopQueries = queryDAO.getQueriesForWorkshop(
-                            currentUser.getUserId());
-                    Platform.runLater(() ->
-                            workshopQueryTable.setItems(
-                                    FXCollections.observableArrayList(workshopQueries)));
+                    workshopQueries = queryDAO.getQueriesForWorkshop();
+                    workshopQueryTable.setItems(
+                            FXCollections.observableArrayList(workshopQueries));
 
                     // Hide add/edit/delete for customers
                     // (read-only view)

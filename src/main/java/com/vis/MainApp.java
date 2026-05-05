@@ -1,5 +1,7 @@
 package com.vis;
 
+import com.vis.dao.*;
+import com.vis.util.DataCache;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,6 +15,7 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        preloadDataInBackground();
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/fxml/Landing.fxml")
         );
@@ -44,6 +47,44 @@ public class MainApp extends Application {
         stage.setMinWidth(1000);
         stage.setMinHeight(650);
         stage.show();
+    }
+
+    private void preloadDataInBackground() {
+        Thread t = new Thread(() -> {
+            try {
+                DataCache cache = DataCache.getInstance();
+                VehicleDAO   vehicleDAO   = new VehicleDAO();
+                CustomerDAO  customerDAO  = new CustomerDAO();
+                PoliceDAO    policeDAO    = new PoliceDAO();
+                InsuranceDAO insuranceDAO = new InsuranceDAO();
+                ServiceRecordDAO serviceDAO =
+                        new ServiceRecordDAO();
+
+                cache.vehicles   =
+                        vehicleDAO.getAllVehiclesWithOwners();
+                cache.customers  =
+                        customerDAO.getAllCustomers();
+                cache.violations =
+                        policeDAO.getAllViolations();
+                cache.reports    =
+                        policeDAO.getAllReports();
+                cache.insurance  =
+                        insuranceDAO.getAllRecordsWithVehicle();
+                cache.services   =
+                        serviceDAO.getAllServiceRecords();
+
+                cache.markReady();
+                System.out.println(
+                        "✅ Data preloaded successfully.");
+
+            } catch (Exception e) {
+                System.err.println(
+                        "Preload failed: " + e.getMessage());
+            }
+        });
+        t.setDaemon(true);
+        t.setName("preload-thread");
+        t.start();
     }
 
     public static void main(String[] args) {

@@ -254,7 +254,7 @@
                                           styleClass="form-combo"
                                           prefWidth="260"
                                           onAction="#handleServiceFilter"/>
-                                <Button text="+ Add Record"
+                                <Button text="Add Record"
                                         styleClass="btn-primary"
                                         onAction="#handleAddService"/>
                                 <Button text="Clear"

@@ -2,6 +2,7 @@ package com.vis.dao;
 
 import com.vis.model.Vehicle;
 import com.vis.util.DBConnection;
+import com.vis.util.DataCache;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -84,6 +85,7 @@ public class VehicleDAO {
             }
 
             cs.execute();
+            DataCache.getInstance().invalidate();
             return true;
 
         } catch (SQLException e) {
@@ -110,7 +112,11 @@ public class VehicleDAO {
             ps.setInt(6, v.getOwnerId());
             ps.setString(7, v.getImagePath());
             ps.setInt(8, v.getVehicleId());
-            return ps.executeUpdate() > 0;
+
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
+
 
         } catch (SQLException e) {
             System.err.println("Error updating vehicle: " + e.getMessage());
@@ -126,7 +132,11 @@ public class VehicleDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
+
 
         } catch (SQLException e) {
             System.err.println("Error deleting vehicle: " + e.getMessage());

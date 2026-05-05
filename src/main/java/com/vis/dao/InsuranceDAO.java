@@ -2,6 +2,7 @@ package com.vis.dao;
 
 import com.vis.model.InsuranceRecord;
 import com.vis.util.DBConnection;
+import com.vis.util.DataCache;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -41,7 +42,9 @@ public class InsuranceDAO {
             ps.setDate(5, Date.valueOf(r.getEndDate()));
             ps.setDouble(6, r.getPremiumAmount());
             ps.setString(7, r.getStatus());
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
 
         } catch (SQLException e) {
             System.err.println("Error adding insurance: " + e.getMessage());
@@ -58,7 +61,9 @@ public class InsuranceDAO {
 
             ps.setString(1, status);
             ps.setInt(2, id);
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
 
         } catch (SQLException e) {
             System.err.println("Error updating insurance: " + e.getMessage());
@@ -73,7 +78,9 @@ public class InsuranceDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+            boolean success = ps.executeUpdate() > 0;
+            if (success) DataCache.getInstance().invalidate(); // ← only if it worked
+            return success;
 
         } catch (SQLException e) {
             System.err.println("Error deleting insurance: " + e.getMessage());

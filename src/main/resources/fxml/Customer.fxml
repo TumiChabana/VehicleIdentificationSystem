@@ -190,13 +190,20 @@
 
                         <!-- RIGHT: Form (Admin) / My Vehicles (Customer) -->
                         <ScrollPane styleClass="scroll-pane"
-                                    fitToWidth="true">
-                            <VBox>
+                                    fitToWidth="true"
+                                    fitToHeight="true"
+                                    SplitPane.resizableWithParent="true">
+                            <VBox SplitPane.resizableWithParent="true"
+                                  VBox.vgrow="ALWAYS"
+                                  maxHeight="Infinity"
+                                  minHeight="0">
                             <!-- ADMIN FORM -->
                             <VBox fx:id="adminCustomerForm"
                                   styleClass="panel-card"
                                   spacing="16"
-                                  VBox.vgrow="ALWAYS">
+                                  VBox.vgrow="ALWAYS"
+                                  maxHeight="Infinity"
+                                  minHeight="0">
                                 <padding>
                                     <Insets top="20" right="24"
                                             bottom="20" left="24"/>
@@ -221,7 +228,7 @@
                                 <Label text="EMAIL ADDRESS"
                                        styleClass="field-label"/>
                                 <TextField fx:id="fieldEmail"
-                                           promptText="e.g. name@email.com"
+                                           promptText="e.g. name@yahoo.com"
                                            styleClass="form-field"/>
 
                                 <Label text="ADDRESS"
@@ -230,7 +237,8 @@
                                           promptText="e.g. 12 Moshoeshoe Rd"
                                           styleClass="form-field"
                                           prefHeight="80"
-                                          wrapText="true"/>
+                                          wrapText="true"
+                                          VBox.vgrow="ALWAYS"/>
 
                                 <Button fx:id="customerSaveBtn"
                                         text="SAVE CUSTOMER"

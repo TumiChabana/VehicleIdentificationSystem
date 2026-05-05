@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class InsuranceController
         extends BaseModuleController implements Initializable {
 
-    // ── POLICIES TAB ─────────────────────────────
+    //POLICIES TAB
     @FXML private ComboBox<String> policyStatusFilter;
     @FXML private TextField policySearchField;
     @FXML private TableView<InsuranceRecord> policyTable;
@@ -53,13 +53,6 @@ public class InsuranceController
     @FXML private ComboBox<String> policyStatusCombo;
 
     // ── OVERVIEW TAB ─────────────────────────────
-    @FXML private Label activeCount;
-    @FXML private Label expiredCount;
-    @FXML private Label cancelledCount;
-    @FXML private Label totalPremium;
-    @FXML private ProgressBar activeProgressBar;
-    @FXML private ProgressBar expiredProgressBar;
-    @FXML private ProgressBar cancelledProgressBar;
     @FXML private TableView<InsuranceRecord> expiringTable;
     @FXML private TableColumn<InsuranceRecord, String> colExVehicle;
     @FXML private TableColumn<InsuranceRecord, String> colExProvider;
@@ -134,7 +127,6 @@ public class InsuranceController
                     policyVehicleCombo.setItems(
                             FXCollections.observableArrayList(
                                     vehicles));
-                    updateOverview();
                 });
                 return null;
             }
@@ -287,20 +279,6 @@ public class InsuranceController
                 .mapToDouble(InsuranceRecord::getPremiumAmount)
                 .sum();
 
-        activeCount.setText(String.valueOf(active));
-        expiredCount.setText(String.valueOf(expired));
-        cancelledCount.setText(String.valueOf(cancelled));
-        totalPremium.setText(
-                String.format("M %.2f", total));
-
-        // Animate progress bars
-        double total2 = allPolicies.size();
-        animateBar(activeProgressBar,
-                total2 > 0 ? active / total2 : 0);
-        animateBar(expiredProgressBar,
-                total2 > 0 ? expired / total2 : 0);
-        animateBar(cancelledProgressBar,
-                total2 > 0 ? cancelled / total2 : 0);
 
         // Expiring within 30 days
         List<InsuranceRecord> expiringSoon =
