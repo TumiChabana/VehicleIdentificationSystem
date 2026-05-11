@@ -122,7 +122,7 @@
                                            styleClass="detail-key"
                                            minWidth="80"/>
                                     <Label fx:id="profileName"
-                                           text=":"
+                                           text=" : "
                                            styleClass="detail-value"/>
                                 </HBox>
                                 <HBox styleClass="detail-row" spacing="8">

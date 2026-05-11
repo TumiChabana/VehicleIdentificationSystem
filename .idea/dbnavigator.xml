@@ -11,10 +11,10 @@
   </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
     <assistants>
-      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
+      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
         <tools />
       </assistant-state>
-      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
+      <assistant-state connection-id="d42adb4a-0f6f-4c2b-9fe8-351692dc9231" assistant-type="SELECT_AI" default-profile-name="" selected-chat-id="" availability="UNAVAILABLE" acknowledgement="NONE">
         <tools />
       </assistant-state>
     </assistants>
@@ -375,13 +375,9 @@ ALTER TABLE users
 ADD COLUMN IF NOT EXISTS identifier 
 VARCHAR(100);
 
--- Link existing customers to users
--- customer1 → Litumeleng Mokoena (customer_id = 1)
 UPDATE users SET customer_id = 1 
 WHERE username = 'customer1';
 
--- Link officers to their reports
--- officer1's reports (update existing reports)
 UPDATE police_report 
 SET created_by_user_id = (
     SELECT user_id FROM users WHERE username = 'officer1'

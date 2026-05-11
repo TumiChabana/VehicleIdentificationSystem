@@ -151,7 +151,7 @@
                                    styleClass="page-subtitle"/>
                         </VBox>
                         <Button fx:id="addVehicleBtn"
-                                text="+ Add Vehicle"
+                                text="Add Vehicle"
                                 styleClass="btn-primary"
                                 onAction="#openWorkshop"/>
                     </HBox>
